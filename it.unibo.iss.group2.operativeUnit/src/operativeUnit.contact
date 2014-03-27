@@ -47,7 +47,7 @@ BehaviorOf gaugeDisplay {
 	endstate
 	
 	state GDStop
-		showMsg("----- rimando indietrasdo -----")
+		showMsg("----- rimando indietro -----")
 		doOut pongSendBall("pluto")
 		transitToEnd
 	endstate	
