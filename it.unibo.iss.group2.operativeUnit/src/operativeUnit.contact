@@ -1,0 +1,54 @@
+ContactSystem OperativeUnitSystem spaceUpdater [host="localhost" port=8070];
+
+// Structure
+Context ctxOperativeUnit -o;
+
+Subject cmdDisplay context ctxOperativeUnit -w;
+Subject gaugeDisplay context ctxOperativeUnit -w;
+
+Subject drone external;
+
+Dispatch test;
+Invitation start;
+
+//Interactions
+pingSendBall: cmdDisplay forward test to gaugeDisplay;
+pingReceiveBall: cmdDisplay serve test;
+
+pongSendBall: gaugeDisplay forward test to cmdDisplay;
+pongReceiveBall: gaugeDisplay serve test;
+
+operativeUnitSendStart: cmdDisplay ask start to drone;
+droneReceiveStart: drone accept start support=TCP [host="localhost" port=8060];
+
+//Behaviour
+BehaviorOf cmdDisplay {
+		
+	state CDStart initial
+		showMsg("----- GAUGE DISPLAY START -----")
+		doOutIn operativeUnitSendStart("fottiti")
+		doOut pingSendBall("test mandato")
+		onMessage test transitTo CDStop
+		//goToState CDStop
+	endstate
+	
+	state CDStop
+		showMsg("----- test ricevuto -----")
+		transitToEnd
+	endstate	
+}
+
+BehaviorOf gaugeDisplay {
+		
+	state GDStart initial
+		showMsg("----- GAUGE DISPLAY START -----")
+		doIn pongReceiveBall("pippo")
+		goToState GDStop
+	endstate
+	
+	state GDStop
+		showMsg("----- rimando indietrasdo -----")
+		doOut pongSendBall("pluto")
+		transitToEnd
+	endstate	
+}

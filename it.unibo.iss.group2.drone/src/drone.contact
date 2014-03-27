@@ -1,0 +1,26 @@
+ContactSystem DroneSystem spaceUpdater [host="localhost" port=8070];
+
+Context ctxDrone -o;
+
+//Structure
+Subject drone -w;
+
+Invitation start;
+
+//Interaction
+droneReceiveStart: drone accept start support=TCP [host="localhost" port=8060];
+
+
+//Behaviour
+BehaviorOf drone {
+		
+	state DStart initial
+		showMsg("----- Drone startato -----")
+		onMessage start transitTo DStop
+	endstate
+	
+	state DStop
+		showMsg("----- Drone stoppato-----" + code.curInputMsgContent)
+		transitToEnd
+	endstate	
+}
