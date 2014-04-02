@@ -8,32 +8,56 @@ Subject gaugeDisplay context ctxOperativeUnit -w;
 
 Subject drone external;
 
-Dispatch test;
-Invitation start;
+Invitation command;		// Generico, il contenuto permette di discriminare tra i singoli comandi
+Request initialSpeed;	
+//Stream streamFoto 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
 
 //Interactions
-pingSendBall: cmdDisplay forward test to gaugeDisplay;
-pingReceiveBall: cmdDisplay serve test;
+operativeUnitSendInitialSpeed: cmdDisplay demand initialSpeed to drone;
+droneReceiveInitialSpeed: drone grant initialSpeed support=TCP [host="localhost" port=8060];
 
-pongSendBall: gaugeDisplay forward test to cmdDisplay;
-pongReceiveBall: gaugeDisplay serve test;
+operativeUnitSendCommand: cmdDisplay ask command to drone;
+droneReceiveCommand: drone accept command support=TCP [host="localhost" port=8060]; 
 
-operativeUnitSendStart: cmdDisplay ask start to drone;
-droneReceiveStart: drone accept start support=TCP [host="localhost" port=8060];
 
 //Behaviour
 BehaviorOf cmdDisplay {
 		
-	state CDStart initial
-		showMsg("----- GAUGE DISPLAY START -----")
-		doOutIn operativeUnitSendStart("fottiti")
-		doOut pingSendBall("test mandato")
-		onMessage test transitTo CDStop
-		//goToState CDStop
+	state cmdInit initial
+		showMsg("----- COMMAND DISPLAY INIT -----")
+		// TODO: aspetta il click dell'utente
+		goToState cmdEnd
 	endstate
 	
-	state CDStop
-		showMsg("----- test ricevuto -----")
+	state cmdPreMission
+		doOutIn operativeUnitSendInitialSpeed("fottiti")
+		acquireAnswerFor initialSpeed
+		showMsg( code.curReplyContent )
+		// TODO: asptta start dell'utente
+		goToState cmdStartMission
+	endstate
+	
+	state cmdStartMission
+		doOutIn operativeUnitSendCommand("start")
+		//acquireOneAckFor command
+		call curAcquireOneReply.acquireReply()
+		goToState cmdIdle
+	endstate
+	
+	state cmdIdle
+		// TODO: l'utente pigia i tasti e in base al tasto viene mandato il comando
+		doOutIn operativeUnitSendCommand("stop")
+		call curAcquireOneReply.acquireReply()
+		goToState cmdReceiveStream
+	endstate
+	
+	state cmdReceiveStream
+		// TODO: ricevere in qualche modo lo stream delle foto
+		goToState cmdEnd
+	endstate
+	
+	state cmdEnd
+		showMsg("----- COMMAND DISPLAY STOP -----")
 		transitToEnd
 	endstate	
 }
@@ -42,13 +66,11 @@ BehaviorOf gaugeDisplay {
 		
 	state GDStart initial
 		showMsg("----- GAUGE DISPLAY START -----")
-		doIn pongReceiveBall("pippo")
 		goToState GDStop
 	endstate
 	
 	state GDStop
 		showMsg("----- rimando indietro -----")
-		doOut pongSendBall("pluto")
 		transitToEnd
 	endstate	
 }

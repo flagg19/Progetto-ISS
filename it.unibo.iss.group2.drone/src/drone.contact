@@ -5,22 +5,65 @@ Context ctxDrone -o;
 //Structure
 Subject drone -w;
 
-Invitation start;
+Invitation command;		// Generico, il contenuto permette di discriminare tra i singoli comandi
+Request initialSpeed;	
+//Stream streamFoto 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
 
-//Interaction
-droneReceiveStart: drone accept start support=TCP [host="localhost" port=8060];
+//Interactions
+droneReceiveInitialSpeed: drone grant initialSpeed support=TCP [host="localhost" port=8060];
+droneReceiveCommand: drone accept command support=TCP [host="localhost" port=8060];
 
 
 //Behaviour
 BehaviorOf drone {
 		
-	state DStart initial
-		showMsg("----- Drone startato -----")
-		onMessage start transitTo DStop
+	var curCommandContent = ""
+		
+	state droneInit initial
+		showMsg("----- DRONE START -----")
+		onMessage initialSpeed transitTo droneStop
 	endstate
 	
-	state DStop
-		showMsg("----- Drone stoppato-----" + code.curInputMsgContent)
+	state droneSetInitialSpeed
+		// setta la sua velocitˆ ancora come non si sˆ (smanovrando in variabili sue)
+		goToState droneStopped
+	endstate
+	
+	state droneStopped
+		doIn droneReceiveCommand()
+		set curCommandContent = code.curInputMsgContent
+		if {"start" == curCommandContent}
+		{
+			goToState droneFly
+		}
+		goToState droneStopped
+	endstate
+	
+	state droneFly
+		// TODO: mi muovo
+		// TODO: consumo
+		// TODO: mando info a gauge
+		onMessage? command goToState droneProcessCommand
+		goToState droneFly
+	endstate
+	
+	state droneProcessCommand
+		set curCommandContent = code.curInputMsgContent
+		// TODO: fare cose sensate in base al contenuto del comando
+		if {"stop" == curCommandContent}
+		{
+			goToState droneSendStream
+		}
+	endstate
+	
+	state droneSendStream
+		// TODO: manda lo stream al command display
+		goToState droneStop
+	endstate
+	
+	state droneStop
+		replyToRequest initialSpeed("fottiti tu");
+		showMsg("----- DRONE STOP-----" + code.curInputMsgContent)
 		transitToEnd
 	endstate	
 }
