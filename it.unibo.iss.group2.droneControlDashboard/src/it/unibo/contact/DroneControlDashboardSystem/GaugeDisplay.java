@@ -1,4 +1,4 @@
-package it.unibo.contact.OperativeUnitSystem;
+package it.unibo.contact.DroneControlDashboardSystem;
 
 public class GaugeDisplay extends GaugeDisplaySupport{
 

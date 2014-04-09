@@ -1,10 +1,10 @@
-ContactSystem OperativeUnitSystem spaceUpdater [host="localhost" port=8070];
+ContactSystem DroneControlDashboardSystem spaceUpdater [host="localhost" port=8070];
 
 // Structure
-Context ctxOperativeUnit -o;
+Context ctxDroneControlDashboard -o;
 
-Subject cmdDisplay context ctxOperativeUnit -w;
-Subject gaugeDisplay context ctxOperativeUnit -w;
+Subject cmdDisplay context ctxDroneControlDashboard -w;
+Subject gaugeDisplay context ctxDroneControlDashboard -w;
 
 Subject drone external;
 
