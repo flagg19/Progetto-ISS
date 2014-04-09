@@ -9,20 +9,24 @@ Subject gaugeDisplay context ctxDroneControlDashboard -w;
 Subject drone external;
 
 Invitation command;		// Generico, il contenuto permette di discriminare tra i singoli comandi
-Request initialSpeed;	
+Request initialSpeed;
+Dispatch misuration;	// Questa roba contiene un droneState	
 //Stream streamFoto 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
 
 //Interactions
-operativeUnitSendInitialSpeed: cmdDisplay demand initialSpeed to drone;
+cmdDisplaySendInitialSpeed: cmdDisplay demand initialSpeed to drone;
 droneReceiveInitialSpeed: drone grant initialSpeed support=TCP [host="localhost" port=8060];
 
-operativeUnitSendCommand: cmdDisplay ask command to drone;
+cmdDisplaySendCommand: cmdDisplay ask command to drone;
 droneReceiveCommand: drone accept command support=TCP [host="localhost" port=8060]; 
 
+droneSendMisuration: drone forward misuration to gaugeDisplay;
+gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="localhost" port=8060];
 
 //Behaviour
 BehaviorOf cmdDisplay {
-		
+	var command = "stop"
+	
 	state cmdInit initial
 		showMsg("----- COMMAND DISPLAY INIT -----")
 		// TODO: aspetta il click dell'utente
@@ -30,7 +34,7 @@ BehaviorOf cmdDisplay {
 	endstate
 	
 	state cmdPreMission
-		doOutIn operativeUnitSendInitialSpeed("fottiti")
+		doOutIn cmdDisplaySendInitialSpeed("fottiti")
 		acquireAnswerFor initialSpeed
 		showMsg( code.curReplyContent )
 		// TODO: asptta start dell'utente
@@ -38,7 +42,7 @@ BehaviorOf cmdDisplay {
 	endstate
 	
 	state cmdStartMission
-		doOutIn operativeUnitSendCommand("start")
+		doOutIn cmdDisplaySendCommand("start")
 		//acquireOneAckFor command
 		call curAcquireOneReply.acquireReply()
 		goToState cmdIdle
@@ -46,9 +50,23 @@ BehaviorOf cmdDisplay {
 	
 	state cmdIdle
 		// TODO: l'utente pigia i tasti e in base al tasto viene mandato il comando
-		doOutIn operativeUnitSendCommand("stop")
+		// if bottonePremuto {
+		//     command = bottonePremuto()
+		//     goToState cmdProcessCommand
+		// }
+		doOutIn cmdDisplaySendCommand("stop")
 		call curAcquireOneReply.acquireReply()
 		goToState cmdReceiveStream
+	endstate
+	
+	state cmdProcessCommand
+		doOutIn cmdDisplaySendCommand(command)	// invio messaggi di increaseSpeed, decreaseSpeed
+		call curAcquireOneReply.acquireReply()
+		if {command == "stop"}
+		{
+			goToState cmdReceiveStream	
+		}
+		goToState cmdIdle
 	endstate
 	
 	state cmdReceiveStream
@@ -64,12 +82,21 @@ BehaviorOf cmdDisplay {
 
 BehaviorOf gaugeDisplay {
 		
-	state GDStart initial
+	state gdInit initial
 		showMsg("----- GAUGE DISPLAY START -----")
-		goToState GDStop
+		goToState gdIdle
 	endstate
 	
-	state GDStop
+	state gdIdle
+		onMessage misuration transitTo gdUpdateView
+	endstate
+	
+	state gdUpdateView
+	
+		goToState gdIdle
+	endstate
+	
+	state gdEnd
 		showMsg("----- rimando indietro -----")
 		transitToEnd
 	endstate	
