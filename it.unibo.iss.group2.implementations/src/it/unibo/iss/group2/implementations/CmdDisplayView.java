@@ -1,7 +1,9 @@
 package it.unibo.iss.group2.implementations;
 
 import it.unibo.iss.group2.implementations.measures.Speed;
+import it.unibo.iss.group2.interfaces.cmd.ButtonLabels;
 import it.unibo.iss.group2.interfaces.measures.ISpeed;
+import it.unibo.iss.group2.interfaces.monitor.ISyncMonitor;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -26,6 +28,8 @@ import java.awt.event.ActionListener;
  */
 public class CmdDisplayView {
 	
+	private ISyncMonitor syncMonitor;
+	
 	private final String      name;
 	private final JPanel      pnlMain;
 	private final JPanel      pnlCommand;
@@ -45,7 +49,9 @@ public class CmdDisplayView {
 	 * ad ogni componente
 	 * @param name
 	 */
-	public CmdDisplayView(final String name) {
+	public CmdDisplayView(final String name, ISyncMonitor syncMonitor) {
+		
+		this.syncMonitor = syncMonitor;
 		
 		this.name = name;
 	    this.pnlMain = new JPanel();
@@ -159,8 +165,8 @@ public class CmdDisplayView {
 	 * @param name
 	 * @return
 	 */
-	public static CmdDisplayView istantiate(final String name) {
-		return new CmdDisplayView(name);
+	public static CmdDisplayView istantiate(final String name, ISyncMonitor syncMonitor) {
+		return new CmdDisplayView(name, syncMonitor);
 	}
     
 	/**

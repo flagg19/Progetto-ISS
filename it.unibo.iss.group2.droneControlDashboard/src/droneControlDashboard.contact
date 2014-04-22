@@ -26,10 +26,14 @@ gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="l
 //Behaviour
 BehaviorOf cmdDisplay {
 	var command = "stop"
+	var it.unibo.iss.group2.interfaces.monitor.ISyncMonitor syncMonitor = null
+	var it.unibo.iss.group2.implementations.DroneControlDashboardView gui = null
 	
 	state cmdInit initial
 		showMsg("----- COMMAND DISPLAY INIT -----")
 		// TODO: aspetta il click dell'utente
+		set syncMonitor = call it.unibo.iss.group2.implementations.monitor.SyncMonitor.instantiate()
+		set gui = call it.unibo.iss.group2.implementations.DroneControlDashboardView.istantiate(syncMonitor)
 		goToState cmdEnd
 	endstate
 	

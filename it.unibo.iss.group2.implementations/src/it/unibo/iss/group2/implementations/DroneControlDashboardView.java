@@ -5,21 +5,22 @@ import it.unibo.iss.group2.implementations.gauges.LocTracker;
 import it.unibo.iss.group2.implementations.gauges.Odometer;
 import it.unibo.iss.group2.implementations.gauges.Speedometer;
 import it.unibo.iss.group2.interfaces.globals.Globals;
+import it.unibo.iss.group2.interfaces.monitor.ISyncMonitor;
 
 import javax.swing.GroupLayout;
 import javax.swing.JFrame;
 
 public class DroneControlDashboardView extends JFrame {
-	
-	private DroneControlDashboardView() {
-		CmdDisplayView cdv = CmdDisplayView.istantiate("Command Display"); 
+		
+	private DroneControlDashboardView(ISyncMonitor syncMonitor) {
+		CmdDisplayView cdv = CmdDisplayView.istantiate("Command Display", syncMonitor); 
 		
 		GaugeDisplayView gdv = GaugeDisplayView.istantiate("Gauge Display", 
 						Fuelometer.istantiate("Fuelometer", "l", Globals.MIN_FUEL, Globals.MAX_FUEL),
 						Speedometer.istantiate("Speedometer", "km/h", Globals.MIN_SPEED, Globals.MAX_SPEED),
 						Odometer.istantiate("Odometer", "km", Globals.MIN_DISTANCE, Globals.MAX_DISTANCE), 
 						LocTracker.istantiate("Loctracker"));
-		
+				
 		try {
 		    setTitle("Drone Control Dashboard");
 		    setVisible(true);
@@ -62,8 +63,8 @@ public class DroneControlDashboardView extends JFrame {
 
 	}
 	
-	public static DroneControlDashboardView istantiate() {
-		return new DroneControlDashboardView();
+	public static DroneControlDashboardView istantiate(ISyncMonitor syncMonitor) {
+		return new DroneControlDashboardView(syncMonitor);
 	}
 	
 }
