@@ -25,48 +25,71 @@ gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="l
 
 //Behaviour
 BehaviorOf cmdDisplay {
-	var command = "stop"
+	var it.unibo.iss.group2.implementations.messages.Command commandMsg = null
 	var it.unibo.iss.group2.interfaces.monitor.ISyncMonitor syncMonitor = null
 	var it.unibo.iss.group2.implementations.DroneControlDashboardView gui = null
-	
+	var it.unibo.iss.group2.interfaces.cmd.ButtonLabels buttonLabel = null
+	var it.unibo.iss.group2.interfaces.cmd.ButtonLabels tempLabel = null
+			
 	state cmdInit initial
-		showMsg("----- COMMAND DISPLAY INIT -----")
-		// TODO: aspetta il click dell'utente
+		showMsg("----- COMMAND DISPLAY INIT -----");
+		// Inizializzazione strutture dati ausiliarie 
 		set syncMonitor = call it.unibo.iss.group2.implementations.monitor.SyncMonitor.instantiate()
 		set gui = call it.unibo.iss.group2.implementations.DroneControlDashboardView.istantiate(syncMonitor)
-		goToState cmdEnd
+		goToState cmdSetInitialSpeedAwait
+	endstate
+
+	state cmdSetInitialSpeedAwait
+		showMsg("Waiting for SET_SPEED button");
+		set buttonLabel = call syncMonitor.waitForButton()
+		set tempLabel = call it.unibo.iss.group2.interfaces.cmd.ButtonLabels.getButtonLabels("SET_SPEED")
+		if {buttonLabel != tempLabel}
+		{
+			showMsg("[ERROR] Unexpected command, doing nothing.");
+			goToState cmdSetInitialSpeed
+		}
+		goToState cmdSetInitialSpeed
+	endstate
+	
+	state cmdSetInitialSpeed
+		doOutIn cmdDisplaySendInitialSpeed(call gui.getSpeed())
+		// Attesa risposta (request/response) del drone
+		acquireAnswerFor initialSpeed
+		showMsg(code.curReplyContent)
+		goToState cmdPreMission
 	endstate
 	
 	state cmdPreMission
-		doOutIn cmdDisplaySendInitialSpeed("fottiti")
-		acquireAnswerFor initialSpeed
-		showMsg( code.curReplyContent )
-		// TODO: asptta start dell'utente
+		showMsg("Waiting for START button");
+		set buttonLabel = call syncMonitor.waitForButton()
+		set tempLabel = call it.unibo.iss.group2.interfaces.cmd.ButtonLabels.getButtonLabels("START")
+		if {buttonLabel != tempLabel}
+		{
+			showMsg("[ERROR] Unexpected command, doing nothing.");
+			goToState cmdPreMission
+		}
 		goToState cmdStartMission
 	endstate
 	
 	state cmdStartMission
-		doOutIn cmdDisplaySendCommand("start")
-		//acquireOneAckFor command
-		call curAcquireOneReply.acquireReply()
+		set commandMsg = call it.unibo.iss.group2.implementations.messages.Start.instantiate()
+		doOutIn cmdDisplaySendCommand(call commandMsg.jsonify())
+		acquireAckFor command
 		goToState cmdIdle
 	endstate
 	
 	state cmdIdle
-		// TODO: l'utente pigia i tasti e in base al tasto viene mandato il comando
-		// if bottonePremuto {
-		//     command = bottonePremuto()
-		//     goToState cmdProcessCommand
-		// }
-		doOutIn cmdDisplaySendCommand("stop")
-		call curAcquireOneReply.acquireReply()
-		goToState cmdReceiveStream
+		showMsg("Waiting for any button");
+		set buttonLabel = call syncMonitor.waitForButton()
+		goToState cmdProcessCommand
 	endstate
 	
 	state cmdProcessCommand
-		doOutIn cmdDisplaySendCommand(command)	// invio messaggi di increaseSpeed, decreaseSpeed
+		
+	
+		doOutIn cmdDisplaySendCommand(call commandMsg.jsonify())	// invio messaggi di increaseSpeed, decreaseSpeed
 		call curAcquireOneReply.acquireReply()
-		if {command == "stop"}
+		if {commandMsg == "stop"}
 		{
 			goToState cmdReceiveStream	
 		}

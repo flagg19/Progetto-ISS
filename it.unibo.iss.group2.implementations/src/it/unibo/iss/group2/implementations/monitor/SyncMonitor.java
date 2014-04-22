@@ -19,7 +19,7 @@ public class SyncMonitor implements ISyncMonitor {
 		lastPressedButton = ButtonLabels.NONE;
 	}
 	
-	public synchronized ButtonLabels ask() {
+	public synchronized ButtonLabels waitForButton() {
 		
 		while (lastPressedButton == ButtonLabels.NONE)
 		{

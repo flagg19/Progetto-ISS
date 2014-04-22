@@ -7,5 +7,8 @@
 	<classpathentry kind="lib" path="/it.unibo.iss.group2.lib/lib/it.unibo.interfaces_1.6.12.jar"/>
 	<classpathentry kind="lib" path="/it.unibo.iss.group2.lib/lib/it.unibo.tuprolog_1.0.1.jar"/>
 	<classpathentry kind="lib" path="/it.unibo.iss.group2.lib/lib/org.eclipse.xtext.xbase.lib_2.2.1.v201112130541.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/it.unibo.iss.group2.implementations"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/it.unibo.iss.group2.interfaces"/>
+	<classpathentry kind="lib" path="/it.unibo.iss.group2.lib/lib/org.json-20120521.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

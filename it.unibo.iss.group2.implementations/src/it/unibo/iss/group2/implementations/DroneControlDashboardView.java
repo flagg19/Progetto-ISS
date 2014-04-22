@@ -12,10 +12,13 @@ import javax.swing.JFrame;
 
 public class DroneControlDashboardView extends JFrame {
 		
+	private CmdDisplayView cdv;
+	private GaugeDisplayView gdv;
+	
 	private DroneControlDashboardView(ISyncMonitor syncMonitor) {
-		CmdDisplayView cdv = CmdDisplayView.istantiate("Command Display", syncMonitor); 
 		
-		GaugeDisplayView gdv = GaugeDisplayView.istantiate("Gauge Display", 
+		cdv = CmdDisplayView.istantiate("Command Display", syncMonitor); 
+		gdv = GaugeDisplayView.istantiate("Gauge Display", 
 						Fuelometer.istantiate("Fuelometer", "l", Globals.MIN_FUEL, Globals.MAX_FUEL),
 						Speedometer.istantiate("Speedometer", "km/h", Globals.MIN_SPEED, Globals.MAX_SPEED),
 						Odometer.istantiate("Odometer", "km", Globals.MIN_DISTANCE, Globals.MAX_DISTANCE), 
@@ -67,4 +70,7 @@ public class DroneControlDashboardView extends JFrame {
 		return new DroneControlDashboardView(syncMonitor);
 	}
 	
+	public String getSpeed () {
+		return cdv.getSpeed();
+	}
 }

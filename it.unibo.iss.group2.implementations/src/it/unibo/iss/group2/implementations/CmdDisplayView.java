@@ -34,15 +34,15 @@ public class CmdDisplayView {
 	private final JPanel      pnlMain;
 	private final JPanel      pnlCommand;
 	
-	private final JTextField  txfSpeed;
+	private final JTextField  txtSpeed;
 	private final JLabel      lblTitle;
 	private final JLabel      lblStatus;
 	
-	private final JButton     btnDecSpeed;
-	private final JButton     btnIncSpeed;
-	private final JButton     btnSetSpeed;
-	private final JButton     btnStartMission;
-	private final JButton     btnStopMission;	
+	private JButton     btnDecSpeed;
+	private JButton     btnIncSpeed;
+	private JButton     btnSetSpeed;
+	private JButton     btnStartMission;
+	private JButton     btnStopMission;	
 	
 	/**
 	 * Carica sulla GUI i componenti e imposta la grafica di visualizzazione relativa 
@@ -59,7 +59,7 @@ public class CmdDisplayView {
 	    TitledBorder titled = new TitledBorder("Command Display");
 	    this.pnlMain.setBorder(titled);
 	    
-	    this.txfSpeed = new JFormattedTextField();
+	    this.txtSpeed = new JFormattedTextField();
 	    this.lblTitle = new JLabel();
 	    this.lblStatus = new JLabel();
 	    
@@ -70,7 +70,7 @@ public class CmdDisplayView {
 	    this.btnStopMission = new JButton();
 	    
 	    // Imposto la velocita al valore di crociera fornito da specifiche
-	 	this.txfSpeed.setText("15");
+	 	this.txtSpeed.setText("15");
 	 	
 	    this.lblTitle.setFont(new Font("Arial", Font.BOLD, 16));
 	    this.lblTitle.setText(this.name);
@@ -80,61 +80,19 @@ public class CmdDisplayView {
 		this.lblStatus.setText("Command display initialization done.");
 	    
 	    // BUTTON decSpeed
-		this.btnDecSpeed.setToolTipText("Press to decrement the speed of Drone by an amount equal to 21 km/h.");
-		this.btnDecSpeed.setText("Dec Speed");
-		this.btnDecSpeed.setEnabled(false);
-		this.btnDecSpeed.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				onDecSpeed();
-			}
-		});
+		this.btnDecSpeed = addButton("Dec speed", "Decrease drone speed", ButtonLabels.DEC_SPEED, true);
 		
 		// BUTTON incSpeed
-		this.btnIncSpeed.setToolTipText("Press to increment the speed of Drone by an amount equal to 21 km/h.");
-	    this.btnIncSpeed.setText("Inc Speed");
-	    this.btnIncSpeed.setEnabled(false);
-	    this.btnIncSpeed.addActionListener(new ActionListener() {
-	    	@Override
-	    	public void actionPerformed(final ActionEvent e) {
-	    		onIncSpeed();
-	    	}
-    	});
+		this.btnIncSpeed = addButton("Inc speed", "Increase drone speed", ButtonLabels.INC_SPEED, true);
 	    
 	    // BUTTON setSpeed
-		this.btnSetSpeed.setToolTipText("Press to set the initial speed of the drone.");
-	    this.btnSetSpeed.setText("Set Speed");
-	    this.btnSetSpeed.addActionListener(new ActionListener() {
-	    	@Override
-	    	public void actionPerformed(final ActionEvent e) {
-	    		onSetSpeed(txfSpeed.getText());
-	    	}
-	    });
+		this.btnSetSpeed = addButton("Set speed", "Set drone speed", ButtonLabels.SET_SPEED, true);
 	    
 	    // BUTTON startMission
-		this.btnStartMission.setToolTipText("Press to start the mission.");
-	    this.btnStartMission.setText("Start mission");
-	    this.btnStartMission.setEnabled(false); 
-	    this.btnStartMission.addActionListener(new ActionListener() {
-	    	@Override
-	    	public void actionPerformed(final ActionEvent e) {
-	    		onStartMission();
-	    	}
-	    });
+		this.btnStartMission = addButton("Start mission", "Start drone mission", ButtonLabels.START, true);
 	    
 	    // BUTTON stopMission
-		this.btnStopMission.setToolTipText("Press to stop the mission");
-		this.btnStopMission.setText("Stop mission");
-		
-		// Abilito il pulsante solo a seguito di SetSpeed
-		this.btnStopMission.setEnabled(false);
-		
-		this.btnStopMission.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				onStop();
-			}
-		});
+		this.btnStopMission = addButton("Stop mission", "Stop drone mission", ButtonLabels.STOP, true);
 	    
 	    this.setPnlCommand();
 	    this.setPnlMain();
@@ -183,7 +141,7 @@ public class CmdDisplayView {
 	                .addComponent(btnIncSpeed, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 	                .addComponent(btnDecSpeed, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 	                .addComponent(btnStartMission, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-	                .addComponent(txfSpeed, javax.swing.GroupLayout.Alignment.TRAILING)
+	                .addComponent(txtSpeed, javax.swing.GroupLayout.Alignment.TRAILING)
 	                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlCommandLayout.createSequentialGroup()
 	                    .addGap(0, 0, Short.MAX_VALUE)
 	                    .addComponent(btnStopMission, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -198,7 +156,7 @@ public class CmdDisplayView {
 	        pnlCommandLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 	        .addGroup(pnlCommandLayout.createSequentialGroup()
 	            .addGap(104, 104, 104)
-	            .addComponent(txfSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+	            .addComponent(txtSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
 	            .addGap(57, 57, 57)
 	            .addComponent(btnStartMission, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
 	            .addGap(18, 18, 18)
@@ -225,60 +183,21 @@ public class CmdDisplayView {
 	    this.getPanelMain().add(this.lblStatus, BorderLayout.PAGE_END);
 	}
 	
-	/**
-	 * Metodo invocato alla pressione del pulsante SetSpeed
-	 * @param value Il valore di velocita da associare al metodo
-	 */
-	protected void onSetSpeed(final String value) {
-		try {
-			double speedValue = Double.parseDouble(value);
-			ISpeed speed = new Speed(speedValue);
-			
-			this.btnStartMission.setEnabled(true);
-			
-			this.lblStatus.setText(String.format("Command correctly sent."));
-			
-		} catch (Exception e){
-			this.btnStartMission.setEnabled(false);
-			
-			this.lblStatus.setText("Invalid input speed.");
-			this.txfSpeed.setText("15");
-		}
+	private JButton addButton(String label, String tooltip, final ButtonLabels buttonLabel, boolean enabled) {
+		JButton temp = new JButton();
+		temp.setToolTipText(tooltip);
+		temp.setText(label);
+		temp.setEnabled(enabled);
+		temp.addActionListener(new ActionListener() {
+	    	@Override
+	    	public void actionPerformed(final ActionEvent e) {
+	    		syncMonitor.release(buttonLabel);
+	    	}
+	    });
+		return temp;
 	}
-
-	/**
-	 *  Metodo invocato alla pressione del pulsante IncSpeed
-	 */
-	protected void onIncSpeed() {
-		this.lblStatus.setText(String.format("Command correctly sent."));
-	}
-
-	/**
-	 *  Metodo invocato alla pressione del pulsante DecSpeed
-	 */
-	protected void onDecSpeed() {
-		this.lblStatus.setText(String.format("Command correctly sent."));
-	}
-
-	/**
-	 * Metodo invocato alla pressione del pulsante Start
-	 */
-	protected void onStartMission() {
-		// Abilita i pulsanti di incremento e decremento della velocita
-		this.btnStartMission.setEnabled(false);
-		this.btnSetSpeed.setEnabled(false);
-		
-		this.btnStopMission.setEnabled(true);
-		this.btnIncSpeed.setEnabled(true);
-		this.btnDecSpeed.setEnabled(true);
-		
-		this.lblStatus.setText(String.format("Mission correctly started."));
-	}
-
-	/**
-	 * Metodo invocato alla pressione del pulsante Stop
-	 */
-	protected void onStop() {
-		stopDisplay();
+	
+	public String getSpeed() {
+		return txtSpeed.getText();
 	}
 }

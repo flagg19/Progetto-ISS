@@ -21,27 +21,39 @@ gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="l
 
 //Behaviour
 BehaviorOf drone {
-		
-	var curCommandContent = ""
-		
+	
+	
+	
+	var it.unibo.iss.group2.implementations.messages.Command commandMsg = null
+	var initialSpeedValue = ""
+	
+	action it.unibo.iss.group2.implementations.messages.Command hl_commandFromJSON(String jsonString)
+	action String cleanString(String jsonString)
+	
 	state droneInit initial
 		showMsg("----- DRONE START -----")
-		onMessage initialSpeed transitTo droneStop
+		onMessage initialSpeed transitTo droneSetInitialSpeed
 	endstate
 	
 	state droneSetInitialSpeed
 		// setta la sua velocitˆ ancora come non si sˆ (smanovrando in variabili sue)
+		// TODO finire di settare la velocitˆ
+		set initialSpeedValue = "[SUCCESS] Initial speed set to: " + code.curInputMsgContent
+		replyToRequest initialSpeed(initialSpeedValue)
+		
 		goToState droneStopped
 	endstate
 	
 	state droneStopped
 		doIn droneReceiveCommand()
-		set curCommandContent = code.curInputMsgContent
-		if {"start" == curCommandContent}
+		set commandMsg = exec hl_commandFromJSON(call cleanString(code.curInputMsgContent))
+		showMsg(call commandMsg.getContent())
+		/*if {"start" == commandMsg.getContent()}
 		{
 			goToState droneFly
 		}
-		goToState droneStopped
+		goToState droneStopped*/
+		goToState droneStop
 	endstate
 	
 	state droneFly
@@ -53,12 +65,12 @@ BehaviorOf drone {
 	endstate
 	
 	state droneProcessCommand
-		set curCommandContent = code.curInputMsgContent
+		//set curCommandContent = code.curInputMsgContent
 		// TODO: fare cose sensate in base al contenuto del comando
-		if {"stop" == curCommandContent}
-		{
-			goToState droneSendStream
-		}
+		//if {"stop" == curCommandContent}
+		//{
+			//goToState droneSendStream
+		//}
 		/*if {"increaseSpeed" == curCommandContent}
 		{
 			// bla bla
@@ -73,8 +85,7 @@ BehaviorOf drone {
 	endstate
 	
 	state droneStop
-		replyToRequest initialSpeed("fottiti tu");
-		showMsg("----- DRONE STOP-----" + code.curInputMsgContent)
+		showMsg("----- DRONE STOP-----")
 		transitToEnd
 	endstate	
 }
