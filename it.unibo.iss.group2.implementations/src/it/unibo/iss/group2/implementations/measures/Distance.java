@@ -1,7 +1,11 @@
 package it.unibo.iss.group2.implementations.measures;
-import it.unibo.iss.group2.interfaces.measures.IDistance;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class Distance implements IDistance {
+import it.unibo.iss.group2.interfaces.measures.IDistance;
+import it.unibo.iss.group2.interfaces.messages.IMessage;
+
+public class Distance implements IDistance, IMessage {
 
 	private double distance;
 	
@@ -19,5 +23,28 @@ public class Distance implements IDistance {
 			distance = 0;
 		
 		return distance;
+	}
+
+	@Override
+	public String jsonify() {
+		JSONObject obj = new JSONObject();
+		try {
+			obj.put("distance", distance);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return obj.toString();
+	}
+
+	@Override
+	public IMessage dejsonify(String jsonString) {
+		try {
+			JSONObject obj = new JSONObject(jsonString);
+			String receiveContent = obj.getString("distance");
+			return new Distance(Double.parseDouble(receiveContent));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

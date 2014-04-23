@@ -12,8 +12,14 @@ public class Globals {
 	// FUEL
 	public final static double MIN_FUEL = 0;
 	public final static double MAX_FUEL = 10;
+	public final static double CONSUMPTION_PARAM = 30;
 	
 	// LOCTRACKER
 	public static final double INITIAL_LATITUDE = 40.400;
 	public static final double INITIAL_LONGITUDE = 74.061;
+	
+	// DTF
+	public static final int DTF = 5;
+	
+	
 }

@@ -22,29 +22,40 @@ gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="l
 //Behaviour
 BehaviorOf drone {
 	
-	
-	
 	var it.unibo.iss.group2.implementations.messages.Command commandMsg = null
 	var initialSpeedValue = ""
+	var java.util.HashMap<String, it.unibo.iss.group2.interfaces.cmd.ButtonLabels> labels = null		
+	val it.unibo.iss.group2.sensors.ISensor distanceSensor = new it.unibo.iss.group2.sensors.DistanceSensor()
+	val it.unibo.iss.group2.sensors.ISensor fuelSensor = new it.unibo.iss.group2.sensors.FuelSensor()
+	val it.unibo.iss.group2.sensors.ISensor positionSensor = new it.unibo.iss.group2.sensors.PositionSensor()
+	val it.unibo.iss.group2.sensors.ISensor speedSensor = new it.unibo.iss.group2.sensors.SpeedSensor() 
 	
+	// Nota: la speed in questo contesto non è un valore rilevato istantaneamente da un sensore ma è il valore alla quale il drone è obbligato ad andare
+	var it.unibo.iss.group2.interfaces.measures.ISpeed speed = null
+	var it.unibo.iss.group2.interfaces.measures.IState status = null
+			
+	action java.util.HashMap<String, it.unibo.iss.group2.interfaces.cmd.ButtonLabels> initLabels()
 	action it.unibo.iss.group2.implementations.messages.Command hl_commandFromJSON(String jsonString)
 	action String cleanString(String jsonString)
+	action it.unibo.iss.group2.interfaces.measures.IState hl_readStatus()
 	
 	state droneInit initial
 		showMsg("----- DRONE START -----")
+		set labels = call initLabels()
 		onMessage initialSpeed transitTo droneSetInitialSpeed
 	endstate
 	
 	state droneSetInitialSpeed
 		// setta la sua velocità ancora come non si sà (smanovrando in variabili sue)
 		// TODO finire di settare la velocità
+		//set speed = eval new it.unibo.iss.group2.implementations.measures.Speed(code.curInputMsgContent)
 		set initialSpeedValue = "[SUCCESS] Initial speed set to: " + code.curInputMsgContent
 		replyToRequest initialSpeed(initialSpeedValue)
 		
-		goToState droneStopped
+		goToState droneStill
 	endstate
 	
-	state droneStopped
+	state droneStill
 		doIn droneReceiveCommand()
 		set commandMsg = exec hl_commandFromJSON(call cleanString(code.curInputMsgContent))
 		showMsg(call commandMsg.getContent())

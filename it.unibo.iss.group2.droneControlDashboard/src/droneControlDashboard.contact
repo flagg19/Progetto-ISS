@@ -29,11 +29,15 @@ BehaviorOf cmdDisplay {
 	var it.unibo.iss.group2.interfaces.monitor.ISyncMonitor syncMonitor = null
 	var it.unibo.iss.group2.implementations.DroneControlDashboardView gui = null
 	var it.unibo.iss.group2.interfaces.cmd.ButtonLabels buttonLabel = null
-	var it.unibo.iss.group2.interfaces.cmd.ButtonLabels tempLabel = null
-			
+	var java.util.HashMap<String, it.unibo.iss.group2.interfaces.cmd.ButtonLabels> labels = null		
+	var String contentMessage = ""
+	
+	action java.util.HashMap<String, it.unibo.iss.group2.interfaces.cmd.ButtonLabels> initLabels()
+	
 	state cmdInit initial
 		showMsg("----- COMMAND DISPLAY INIT -----");
 		// Inizializzazione strutture dati ausiliarie 
+		set labels = call initLabels()
 		set syncMonitor = call it.unibo.iss.group2.implementations.monitor.SyncMonitor.instantiate()
 		set gui = call it.unibo.iss.group2.implementations.DroneControlDashboardView.istantiate(syncMonitor)
 		goToState cmdSetInitialSpeedAwait
@@ -42,17 +46,17 @@ BehaviorOf cmdDisplay {
 	state cmdSetInitialSpeedAwait
 		showMsg("Waiting for SET_SPEED button");
 		set buttonLabel = call syncMonitor.waitForButton()
-		set tempLabel = call it.unibo.iss.group2.interfaces.cmd.ButtonLabels.getButtonLabels("SET_SPEED")
-		if {buttonLabel != tempLabel}
+		if {buttonLabel != labels.get("SET_SPEED")}
 		{
 			showMsg("[ERROR] Unexpected command, doing nothing.");
-			goToState cmdSetInitialSpeed
+			goToState cmdSetInitialSpeedAwait
 		}
 		goToState cmdSetInitialSpeed
 	endstate
 	
 	state cmdSetInitialSpeed
-		doOutIn cmdDisplaySendInitialSpeed(call gui.getSpeed())
+		set contentMessage = eval gui.getSpeed().jsonify()
+		doOutIn cmdDisplaySendInitialSpeed(contentMessage)
 		// Attesa risposta (request/response) del drone
 		acquireAnswerFor initialSpeed
 		showMsg(code.curReplyContent)
@@ -62,8 +66,7 @@ BehaviorOf cmdDisplay {
 	state cmdPreMission
 		showMsg("Waiting for START button");
 		set buttonLabel = call syncMonitor.waitForButton()
-		set tempLabel = call it.unibo.iss.group2.interfaces.cmd.ButtonLabels.getButtonLabels("START")
-		if {buttonLabel != tempLabel}
+		if {buttonLabel != labels.get("START")}
 		{
 			showMsg("[ERROR] Unexpected command, doing nothing.");
 			goToState cmdPreMission
@@ -85,14 +88,37 @@ BehaviorOf cmdDisplay {
 	endstate
 	
 	state cmdProcessCommand
-		
-	
-		doOutIn cmdDisplaySendCommand(call commandMsg.jsonify())	// invio messaggi di increaseSpeed, decreaseSpeed
-		call curAcquireOneReply.acquireReply()
-		if {commandMsg == "stop"}
+		if {buttonLabel == labels.get("STOP")}
 		{
-			goToState cmdReceiveStream	
+			set commandMsg = call it.unibo.iss.group2.implementations.messages.Stop.instantiate();
+			doOutIn cmdDisplaySendCommand(call commandMsg.jsonify());
+			acquireAckFor command;
+			showMsg("[COMMAND] STOP");
+			goToState cmdReceiveStream
 		}
+		if {buttonLabel == labels.get("SET_SPEED")}
+		{
+			set contentMessage = eval gui.getSpeed().jsonify();
+			set commandMsg = call it.unibo.iss.group2.implementations.messages.SetSpeed.instantiate(contentMessage);
+			showMsg("[COMMAND] SET SPEED")
+		}
+		if {buttonLabel == labels.get("INC_SPEED")}
+		{
+			set commandMsg = call it.unibo.iss.group2.implementations.messages.IncSpeed.instantiate();
+			showMsg("[COMMAND] INCREASE SPEED")
+		}
+		if {buttonLabel == labels.get("DEC_SPEED")}
+		{
+			set commandMsg = call it.unibo.iss.group2.implementations.messages.DecSpeed.instantiate();
+			showMsg("[COMMAND] DECREASE SPEED")
+		}
+		if {buttonLabel == labels.get("START")}
+		{
+			showMsg("[ERROR] NOn va bene cicciolo");
+			goToState cmdIdle
+		}
+		doOutIn cmdDisplaySendCommand(call commandMsg.jsonify())	// invio messaggi di increaseSpeed, decreaseSpeed
+		acquireAckFor command
 		goToState cmdIdle
 	endstate
 	

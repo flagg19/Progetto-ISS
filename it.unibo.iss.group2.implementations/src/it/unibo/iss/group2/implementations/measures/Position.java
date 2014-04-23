@@ -1,9 +1,13 @@
 package it.unibo.iss.group2.implementations.measures;
 
 import it.unibo.iss.group2.interfaces.measures.IPosition;
-import org.jdesktop.swingx.mapviewer.GeoPosition;
+import it.unibo.iss.group2.interfaces.messages.IMessage;
 
-public class Position implements IPosition {
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class Position implements IPosition, IMessage {
 
 	private GeoPosition position;
 	
@@ -18,5 +22,31 @@ public class Position implements IPosition {
 	
 	private GeoPosition checkCorrectness(GeoPosition position) { 
 		return position;
+	}
+
+	@Override
+	public String jsonify() {
+		JSONObject obj = new JSONObject();
+		try {
+			obj.put("latitude", position.getLatitude());
+			obj.put("longitude", position.getLongitude());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return obj.toString();
+	}
+
+	@Override
+	public IMessage dejsonify(String jsonString) {
+		try {
+			JSONObject obj = new JSONObject(jsonString);
+			String receiveLatitude = obj.getString("latitude");
+			String receiveLongitude = obj.getString("longitude");
+			GeoPosition gp = new GeoPosition(Double.parseDouble(receiveLatitude), Double.parseDouble(receiveLongitude));
+			return new Position(gp);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

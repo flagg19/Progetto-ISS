@@ -30,7 +30,7 @@ public class Command implements IMessage {
 				return DecSpeed.instantiate();
 			}
 			else if (receiveContent.equals(ISetSpeed.content)) {
-				return SetSpeed.instantiate(obj.getString("parameter"));
+				return SetSpeed.instantiate(obj.getJSONObject("parameter").getString("speed"));
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();

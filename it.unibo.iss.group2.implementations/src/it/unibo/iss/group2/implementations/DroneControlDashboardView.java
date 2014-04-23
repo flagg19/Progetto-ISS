@@ -4,6 +4,7 @@ import it.unibo.iss.group2.implementations.gauges.Fuelometer;
 import it.unibo.iss.group2.implementations.gauges.LocTracker;
 import it.unibo.iss.group2.implementations.gauges.Odometer;
 import it.unibo.iss.group2.implementations.gauges.Speedometer;
+import it.unibo.iss.group2.implementations.measures.Speed;
 import it.unibo.iss.group2.interfaces.globals.Globals;
 import it.unibo.iss.group2.interfaces.monitor.ISyncMonitor;
 
@@ -70,7 +71,7 @@ public class DroneControlDashboardView extends JFrame {
 		return new DroneControlDashboardView(syncMonitor);
 	}
 	
-	public String getSpeed () {
-		return cdv.getSpeed();
+	public Speed getSpeed () {
+		return new Speed(Double.parseDouble(cdv.getSpeed()));
 	}
 }

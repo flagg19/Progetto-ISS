@@ -10,5 +10,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/it.unibo.iss.group2.implementations"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/it.unibo.iss.group2.interfaces"/>
 	<classpathentry kind="lib" path="/it.unibo.iss.group2.lib/lib/org.json-20120521.jar"/>
+	<classpathentry kind="lib" path="/it.unibo.iss.group2.lib/lib/swingx-core-1.6.2-2.jar"/>
+	<classpathentry kind="lib" path="/it.unibo.iss.group2.lib/lib/swingx-ws-1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
