@@ -1,6 +1,6 @@
 package it.unibo.contact.DroneControlDashboardSystem;
 
-import it.unibo.iss.group2.interfaces.cmd.ButtonLabels;
+import it.unibo.iss.group2.interfaces.messages.MessageLabels;
 
 import java.util.HashMap;
 
@@ -12,9 +12,9 @@ public class CmdDisplay extends CmdDisplaySupport {
 	}
 
 	@Override
-	protected HashMap<String, ButtonLabels> initLabels() throws Exception {
-		HashMap<String, ButtonLabels> labels = new HashMap<String, ButtonLabels>();
-		for (ButtonLabels bl : ButtonLabels.values()) {
+	protected HashMap<String, MessageLabels> initLabels() throws Exception {
+		HashMap<String, MessageLabels> labels = new HashMap<String, MessageLabels>();
+		for (MessageLabels bl : MessageLabels.values()) {
 			labels.put(bl.name(), bl);
 		}
 		return labels;

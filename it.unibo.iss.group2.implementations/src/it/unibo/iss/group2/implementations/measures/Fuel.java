@@ -2,6 +2,7 @@ package it.unibo.iss.group2.implementations.measures;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import it.unibo.iss.group2.interfaces.globals.Globals;
 import it.unibo.iss.group2.interfaces.measures.IFuel;
 import it.unibo.iss.group2.interfaces.messages.IMessage;
 
@@ -10,7 +11,7 @@ public class Fuel implements IFuel, IMessage {
 	private double fuel;
 	
 	public Fuel(double value) {
-		this.fuel = checkCorrectness(value);
+		this.fuel = constraints(value);
 	}
 	
 	@Override
@@ -18,9 +19,9 @@ public class Fuel implements IFuel, IMessage {
 		return fuel;
 	}	
 	
-	private double checkCorrectness(double fuel) { 
-		if (fuel < 0)
-			fuel = 0;
+	private double constraints(double fuel) { 
+		if (fuel < Globals.MIN_FUEL)
+			fuel = Globals.MIN_FUEL;
 		
 		return fuel;
 	}
@@ -40,8 +41,8 @@ public class Fuel implements IFuel, IMessage {
 	public IMessage dejsonify(String jsonString) {
 		try {
 			JSONObject obj = new JSONObject(jsonString);
-			String receiveContent = obj.getString("fuel");
-			return new Fuel(Double.parseDouble(receiveContent));
+			double receiveContent = obj.getDouble("fuel");
+			return new Fuel(receiveContent);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

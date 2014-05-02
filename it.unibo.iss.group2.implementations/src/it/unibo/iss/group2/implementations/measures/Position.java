@@ -12,7 +12,7 @@ public class Position implements IPosition, IMessage {
 	private GeoPosition position;
 	
 	public Position(GeoPosition value) {
-		this.position = checkCorrectness(value);
+		this.position = constraints(value);
 	}
 	
 	@Override
@@ -20,7 +20,7 @@ public class Position implements IPosition, IMessage {
 		return position;
 	}	
 	
-	private GeoPosition checkCorrectness(GeoPosition position) { 
+	private GeoPosition constraints(GeoPosition position) { 
 		return position;
 	}
 
@@ -40,9 +40,9 @@ public class Position implements IPosition, IMessage {
 	public IMessage dejsonify(String jsonString) {
 		try {
 			JSONObject obj = new JSONObject(jsonString);
-			String receiveLatitude = obj.getString("latitude");
-			String receiveLongitude = obj.getString("longitude");
-			GeoPosition gp = new GeoPosition(Double.parseDouble(receiveLatitude), Double.parseDouble(receiveLongitude));
+			double receiveLatitude = obj.getDouble("latitude");
+			double receiveLongitude = obj.getDouble("longitude");
+			GeoPosition gp = new GeoPosition(receiveLatitude, receiveLongitude);
 			return new Position(gp);
 		} catch (JSONException e) {
 			e.printStackTrace();

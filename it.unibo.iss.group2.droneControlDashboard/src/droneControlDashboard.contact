@@ -11,7 +11,8 @@ Subject drone external;
 Invitation command;		// Generico, il contenuto permette di discriminare tra i singoli comandi
 Request initialSpeed;
 Dispatch misuration;	// Questa roba contiene un droneState	
-//Stream streamFoto 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
+
+Request streamPhoto; 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
 
 //Interactions
 cmdDisplaySendInitialSpeed: cmdDisplay demand initialSpeed to drone;
@@ -20,26 +21,31 @@ droneReceiveInitialSpeed: drone grant initialSpeed support=TCP [host="localhost"
 cmdDisplaySendCommand: cmdDisplay ask command to drone;
 droneReceiveCommand: drone accept command support=TCP [host="localhost" port=8060]; 
 
+droneSendStream: drone demand streamPhoto to cmdDisplay;
+cmdDisplayReceiveStream: cmdDisplay grant streamPhoto support=TCP [host="localhost" port=8020];
+
 droneSendMisuration: drone forward misuration to gaugeDisplay;
-gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="localhost" port=8060];
+gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="localhost" port=8090];
 
 //Behaviour
 BehaviorOf cmdDisplay {
 	var it.unibo.iss.group2.implementations.messages.Command commandMsg = null
 	var it.unibo.iss.group2.interfaces.monitor.ISyncMonitor syncMonitor = null
-	var it.unibo.iss.group2.implementations.DroneControlDashboardView gui = null
-	var it.unibo.iss.group2.interfaces.cmd.ButtonLabels buttonLabel = null
-	var java.util.HashMap<String, it.unibo.iss.group2.interfaces.cmd.ButtonLabels> labels = null		
+	var it.unibo.iss.group2.implementations.CmdDisplayView guiCmd = null
+	var it.unibo.iss.group2.interfaces.messages.MessageLabels buttonLabel = null
+	var java.util.HashMap<String, it.unibo.iss.group2.interfaces.messages.MessageLabels> labels = null		
 	var String contentMessage = ""
 	
-	action java.util.HashMap<String, it.unibo.iss.group2.interfaces.cmd.ButtonLabels> initLabels()
+	var it.unibo.is.interfaces.IContentSegmentable fileToBuild = null
+	
+	action java.util.HashMap<String, it.unibo.iss.group2.interfaces.messages.MessageLabels> initLabels()
 	
 	state cmdInit initial
 		showMsg("----- COMMAND DISPLAY INIT -----");
 		// Inizializzazione strutture dati ausiliarie 
 		set labels = call initLabels()
 		set syncMonitor = call it.unibo.iss.group2.implementations.monitor.SyncMonitor.instantiate()
-		set gui = call it.unibo.iss.group2.implementations.DroneControlDashboardView.istantiate(syncMonitor)
+		set guiCmd = call it.unibo.iss.group2.implementations.CmdDisplayView.instantiate("Cmd Display", syncMonitor)
 		goToState cmdSetInitialSpeedAwait
 	endstate
 
@@ -55,7 +61,7 @@ BehaviorOf cmdDisplay {
 	endstate
 	
 	state cmdSetInitialSpeed
-		set contentMessage = eval gui.getSpeed().jsonify()
+		set contentMessage = eval guiCmd.getSpeed().jsonify()
 		doOutIn cmdDisplaySendInitialSpeed(contentMessage)
 		// Attesa risposta (request/response) del drone
 		acquireAnswerFor initialSpeed
@@ -98,14 +104,14 @@ BehaviorOf cmdDisplay {
 		}
 		if {buttonLabel == labels.get("SET_SPEED")}
 		{
-			set contentMessage = eval gui.getSpeed().jsonify();
+			set contentMessage = eval guiCmd.getSpeed().jsonify();
 			set commandMsg = call it.unibo.iss.group2.implementations.messages.SetSpeed.instantiate(contentMessage);
-			showMsg("[COMMAND] SET SPEED")
+			showMsg("[COMMAND] SET SPEED " + contentMessage + " " + commandMsg)
 		}
 		if {buttonLabel == labels.get("INC_SPEED")}
 		{
 			set commandMsg = call it.unibo.iss.group2.implementations.messages.IncSpeed.instantiate();
-			showMsg("[COMMAND] INCREASE SPEED")
+			showMsg("[COMMAND] INCREASE SPEED" + commandMsg)
 		}
 		if {buttonLabel == labels.get("DEC_SPEED")}
 		{
@@ -114,7 +120,7 @@ BehaviorOf cmdDisplay {
 		}
 		if {buttonLabel == labels.get("START")}
 		{
-			showMsg("[ERROR] NOn va bene cicciolo");
+			showMsg("[ERROR] Unexpected command, doing nothing.");
 			goToState cmdIdle
 		}
 		doOutIn cmdDisplaySendCommand(call commandMsg.jsonify())	// invio messaggi di increaseSpeed, decreaseSpeed
@@ -134,9 +140,14 @@ BehaviorOf cmdDisplay {
 }
 
 BehaviorOf gaugeDisplay {
-		
+	var it.unibo.iss.group2.implementations.measures.Status statusDrone = new it.unibo.iss.group2.implementations.measures.Status()
+	var it.unibo.iss.group2.implementations.GaugeDisplayView guiGauge = null
+	
+	action String cleanString(String jsonString)
+	
 	state gdInit initial
 		showMsg("----- GAUGE DISPLAY START -----")
+		set guiGauge = call it.unibo.iss.group2.implementations.GaugeDisplayView.instantiate("Gauge Display")
 		goToState gdIdle
 	endstate
 	
@@ -145,7 +156,9 @@ BehaviorOf gaugeDisplay {
 	endstate
 	
 	state gdUpdateView
-	
+		showMsg(call cleanString(code.curInputMsgContent))
+		set statusDrone = call statusDrone.dejsonify(call cleanString(code.curInputMsgContent)) 
+		call guiGauge.updateDisplay(statusDrone)
 		goToState gdIdle
 	endstate
 	

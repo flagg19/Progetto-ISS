@@ -5,53 +5,57 @@ Context ctxDrone -o;
 //Structure
 Subject drone -w;
 
+Subject cmdDisplay external;
 Subject gaugeDisplay external;
 
 Invitation command;		// Generico, il contenuto permette di discriminare tra i singoli comandi
 Request initialSpeed;	
 Dispatch misuration;
-//Stream streamFoto 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
+Request streamPhoto; 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
 
 //Interactions
 droneReceiveInitialSpeed: drone grant initialSpeed support=TCP [host="localhost" port=8060];
 droneReceiveCommand: drone accept command support=TCP [host="localhost" port=8060];
 
 droneSendMisuration: drone forward misuration to gaugeDisplay;
-gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="localhost" port=8060];
+gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="localhost" port=8090];
+
+droneSendStream: drone demand streamPhoto to cmdDisplay;
+cmdDisplayReceiveSendStream: cmdDisplay grant streamPhoto support=TCP [host="localhost" port=8020];
 
 //Behaviour
 BehaviorOf drone {
-	
-	var it.unibo.iss.group2.implementations.messages.Command commandMsg = null
+	var it.unibo.iss.group2.implementations.messages.Command commandMsg = new it.unibo.iss.group2.implementations.messages.Command()
 	var initialSpeedValue = ""
-	var java.util.HashMap<String, it.unibo.iss.group2.interfaces.cmd.ButtonLabels> labels = null		
+	var java.util.HashMap<String, String> messageLabels = null
 	val it.unibo.iss.group2.sensors.ISensor distanceSensor = new it.unibo.iss.group2.sensors.DistanceSensor()
 	val it.unibo.iss.group2.sensors.ISensor fuelSensor = new it.unibo.iss.group2.sensors.FuelSensor()
 	val it.unibo.iss.group2.sensors.ISensor positionSensor = new it.unibo.iss.group2.sensors.PositionSensor()
 	val it.unibo.iss.group2.sensors.ISensor speedSensor = new it.unibo.iss.group2.sensors.SpeedSensor() 
 	
 	// Nota: la speed in questo contesto non è un valore rilevato istantaneamente da un sensore ma è il valore alla quale il drone è obbligato ad andare
-	var it.unibo.iss.group2.interfaces.measures.ISpeed speed = null
-	var it.unibo.iss.group2.interfaces.measures.IState status = null
+	var it.unibo.iss.group2.implementations.measures.Speed speedDrone = new it.unibo.iss.group2.implementations.measures.Speed(0)
+	var it.unibo.iss.group2.implementations.measures.Status statusDrone = null
 			
-	action java.util.HashMap<String, it.unibo.iss.group2.interfaces.cmd.ButtonLabels> initLabels()
+	action java.util.HashMap<String, String> initLabels()
 	action it.unibo.iss.group2.implementations.messages.Command hl_commandFromJSON(String jsonString)
+	action it.unibo.iss.group2.implementations.measures.Speed hl_speedFromCommand(it.unibo.iss.group2.implementations.messages.Command cmdSetString)
 	action String cleanString(String jsonString)
-	action it.unibo.iss.group2.interfaces.measures.IState hl_readStatus()
+	action it.unibo.iss.group2.implementations.measures.Status hl_readStatus()
+	action void delay()
+	action void accelerate()
 	
 	state droneInit initial
 		showMsg("----- DRONE START -----")
-		set labels = call initLabels()
+		set messageLabels = call initLabels()
 		onMessage initialSpeed transitTo droneSetInitialSpeed
 	endstate
 	
 	state droneSetInitialSpeed
-		// setta la sua velocità ancora come non si sà (smanovrando in variabili sue)
-		// TODO finire di settare la velocità
-		//set speed = eval new it.unibo.iss.group2.implementations.measures.Speed(code.curInputMsgContent)
-		set initialSpeedValue = "[SUCCESS] Initial speed set to: " + code.curInputMsgContent
+		set speedDrone = call speedDrone.dejsonify(call cleanString(code.curInputMsgContent))
+		set initialSpeedValue = "[SUCCESS] Initial speed set to: " + call speedDrone.getSpeedAsDouble()
+		call accelerate()
 		replyToRequest initialSpeed(initialSpeedValue)
-		
 		goToState droneStill
 	endstate
 	
@@ -59,39 +63,62 @@ BehaviorOf drone {
 		doIn droneReceiveCommand()
 		set commandMsg = exec hl_commandFromJSON(call cleanString(code.curInputMsgContent))
 		showMsg(call commandMsg.getContent())
-		/*if {"start" == commandMsg.getContent()}
+		if {messageLabels.get("START") == commandMsg.getContent()}
 		{
 			goToState droneFly
 		}
-		goToState droneStopped*/
-		goToState droneStop
+		goToState droneStill 
 	endstate
 	
 	state droneFly
-		// TODO: mi muovo
-		// TODO: consumo
-		// TODO: mando info a gauge
+		// Wait DTF 
+		exec delay()
+		// Read status/ use resources
+		set statusDrone = call hl_readStatus()
+		// Send status to Gauge Display
+		doOut droneSendMisuration(call statusDrone.jsonify())
+		showMsg("Inviato: "+call statusDrone.jsonify())
+		// Are there any messages?
 		onMessage? command goToState droneProcessCommand
 		goToState droneFly
 	endstate
 	
 	state droneProcessCommand
-		//set curCommandContent = code.curInputMsgContent
-		// TODO: fare cose sensate in base al contenuto del comando
-		//if {"stop" == curCommandContent}
-		//{
-			//goToState droneSendStream
-		//}
-		/*if {"increaseSpeed" == curCommandContent}
+		doIn droneReceiveCommand()
+		set commandMsg = exec hl_commandFromJSON(call cleanString(code.curInputMsgContent))
+		showMsg("Process command: " +  commandMsg)
+		if {messageLabels.get("STOP") == commandMsg.getContent()}
 		{
-			// bla bla
-			
-		}*/
+			showMsg("[COMMAND] STOP");
+			goToState droneSendStream
+		}
+		if {messageLabels.get("INC_SPEED") == commandMsg.getContent()}
+		{
+			showMsg("[COMMAND] INC_SPEED");
+			set speedDrone = call speedDrone.increaseSpeed();
+			call accelerate();
+			goToState droneFly
+		}
+		if {messageLabels.get("DEC_SPEED") == commandMsg.getContent()}
+		{
+			showMsg("[COMMAND] DEC_SPEED");
+			set speedDrone = call speedDrone.decreaseSpeed();
+			call accelerate();
+			goToState droneFly
+		}
+		if {messageLabels.get("SET_SPEED") == commandMsg.getContent()}
+		{
+			showMsg("[COMMAND] SET_SPEED");
+			set speedDrone = call hl_speedFromCommand(commandMsg);
+			call accelerate();
+			goToState droneFly
+		}
+		showMsg("[ERROR] Unexpected command, doing nothing.")
 		goToState droneFly
 	endstate
 	
 	state droneSendStream
-		// TODO: manda lo stream al command display
+		
 		goToState droneStop
 	endstate
 	

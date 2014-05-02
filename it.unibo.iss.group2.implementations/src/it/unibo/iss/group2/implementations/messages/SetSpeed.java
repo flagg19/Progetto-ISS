@@ -18,6 +18,11 @@ public class SetSpeed extends Command implements ISetSpeed {
 	}
 	
 	@Override
+	public String getParameter() {
+		return parameter;
+	}
+	
+	@Override
 	public String jsonify() {
 		JSONObject obj = new JSONObject();
 		try {

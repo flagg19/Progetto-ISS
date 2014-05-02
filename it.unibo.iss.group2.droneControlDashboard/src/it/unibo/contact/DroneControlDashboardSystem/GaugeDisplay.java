@@ -6,4 +6,9 @@ public class GaugeDisplay extends GaugeDisplaySupport{
 		super(name);
 		// TODO Auto-generated constructor stub
 	}
+	
+	@Override
+	protected String cleanString(String jsonString) throws Exception {
+		return jsonString.replace("'", "");
+	}
 }

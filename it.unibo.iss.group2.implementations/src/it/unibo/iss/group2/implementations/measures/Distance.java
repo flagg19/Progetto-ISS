@@ -2,6 +2,7 @@ package it.unibo.iss.group2.implementations.measures;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import it.unibo.iss.group2.interfaces.globals.Globals;
 import it.unibo.iss.group2.interfaces.measures.IDistance;
 import it.unibo.iss.group2.interfaces.messages.IMessage;
 
@@ -10,7 +11,7 @@ public class Distance implements IDistance, IMessage {
 	private double distance;
 	
 	public Distance(double value) {
-		this.distance = checkCorrectness(value);
+		this.distance = constraints(value);
 	}
 	
 	@Override
@@ -18,9 +19,9 @@ public class Distance implements IDistance, IMessage {
 		return distance;
 	}	
 	
-	private double checkCorrectness(double distance) { 
-		if (distance < 0)
-			distance = 0;
+	private double constraints(double distance) { 
+		if (distance < Globals.MIN_DISTANCE)
+			distance = Globals.MIN_DISTANCE;
 		
 		return distance;
 	}
@@ -40,8 +41,8 @@ public class Distance implements IDistance, IMessage {
 	public IMessage dejsonify(String jsonString) {
 		try {
 			JSONObject obj = new JSONObject(jsonString);
-			String receiveContent = obj.getString("distance");
-			return new Distance(Double.parseDouble(receiveContent));
+			double receiveContent = obj.getDouble("distance");
+			return new Distance(receiveContent);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

@@ -1,11 +1,11 @@
 package it.unibo.iss.group2.interfaces.monitor;
 
-import it.unibo.iss.group2.interfaces.cmd.ButtonLabels;
+import it.unibo.iss.group2.interfaces.messages.MessageLabels;
 
 public interface ISyncMonitor {
 
-	public ButtonLabels waitForButton();
-	public void release(ButtonLabels pressedButton);
+	public MessageLabels waitForButton();
+	public void release(MessageLabels pressedButton);
 	
 }
 

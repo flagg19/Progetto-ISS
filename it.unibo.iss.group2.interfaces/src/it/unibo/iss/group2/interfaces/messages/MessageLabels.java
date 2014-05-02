@@ -1,6 +1,6 @@
-package it.unibo.iss.group2.interfaces.cmd;
+package it.unibo.iss.group2.interfaces.messages;
 
-public enum ButtonLabels {
+public enum MessageLabels {
 	NONE,
 	START,
 	STOP,
@@ -8,7 +8,7 @@ public enum ButtonLabels {
 	DEC_SPEED,
 	SET_SPEED;
 	
-	public static ButtonLabels getButtonLabels(String value) {
+	public static MessageLabels getMessageLabels(String value) {
 		value = value.toUpperCase();
 		if (value.equals("NONE"))
 			return NONE;

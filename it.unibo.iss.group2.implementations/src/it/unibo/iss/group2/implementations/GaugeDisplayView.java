@@ -1,5 +1,7 @@
 package it.unibo.iss.group2.implementations;
 
+import javax.swing.GroupLayout;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
@@ -7,7 +9,8 @@ import it.unibo.iss.group2.implementations.gauges.Fuelometer;
 import it.unibo.iss.group2.implementations.gauges.LocTracker;
 import it.unibo.iss.group2.implementations.gauges.Odometer;
 import it.unibo.iss.group2.implementations.gauges.Speedometer;
-import it.unibo.iss.group2.interfaces.measures.IState;
+import it.unibo.iss.group2.interfaces.globals.Globals;
+import it.unibo.iss.group2.interfaces.measures.IStatus;
 
 import java.awt.*;
 
@@ -24,7 +27,7 @@ import java.awt.*;
  * @author Alessandro
  *
  */
-public class GaugeDisplayView {
+public class GaugeDisplayView extends JFrame {
 
 	private final String		name;
 
@@ -52,14 +55,12 @@ public class GaugeDisplayView {
 	 * @param odometer
 	 * @param locTracker
 	 */
-	protected GaugeDisplayView(final String name, final Fuelometer fuelometer,
-			final Speedometer speedometer, final Odometer odometer, final LocTracker locTracker) {
-
+	protected GaugeDisplayView(final String name) {
 		this.name = name;
-		this.fuelometer = fuelometer;
-		this.speedometer = speedometer;
-		this.odometer = odometer;
-		this.locTracker = locTracker;
+		this.fuelometer = Fuelometer.istantiate("Fuelometer", "l", Globals.MIN_FUEL, Globals.MAX_FUEL);
+		this.speedometer = Speedometer.istantiate("Speedometer", "km/h", Globals.MIN_SPEED, Globals.MAX_SPEED);
+		this.odometer = Odometer.istantiate("Odometer", "km", Globals.MIN_DISTANCE, Globals.MAX_DISTANCE);
+		this.locTracker = LocTracker.istantiate("Loctracker");
 
 		this.pnlMain = new JPanel();
 		this.lblTitle = new JLabel();
@@ -81,6 +82,21 @@ public class GaugeDisplayView {
 		this.setPnlGaugeOver();
 		this.setPnlMain();
 		
+		setVisible(true);
+	      
+	    GroupLayout layout = new GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+            .addComponent(this.getPanelMain(), javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(this.getPanelMain(), javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        pack();
 	}
 	
 	/**
@@ -92,10 +108,8 @@ public class GaugeDisplayView {
 	 * @param locTrackerView
 	 * @return
 	 */
-	public static GaugeDisplayView istantiate(final String name, final Fuelometer fuelometerView, 
-			final Speedometer speedometerView, final Odometer odometerView, final LocTracker locTrackerView) {
-		return new GaugeDisplayView(name, fuelometerView, speedometerView,
-				odometerView, locTrackerView);
+	public static GaugeDisplayView instantiate(final String name) {
+		return new GaugeDisplayView(name);
 	}
 	
 	
@@ -197,10 +211,10 @@ public class GaugeDisplayView {
 	/**
 	 * Metodo utilizzato per aggiornare le informazioni relative ai componenti presenti sulla GUI
 	 */
-	public void updateDisplay(IState value) {
+	public void updateDisplay(IStatus value) {
 		this.lblStatus.setText("Gauge Display updated. Position: (" 
-				+ value.getPosition().getPositionAsGeoPosition().getLatitude() + "°, "
-				+ value.getPosition().getPositionAsGeoPosition().getLongitude() + "°)");
+				+ value.getPosition().getPositionAsGeoPosition().getLatitude() + ", "
+				+ value.getPosition().getPositionAsGeoPosition().getLongitude() + ")");
 		
 		speedometer.setValue(value.getSpeed().getSpeedAsDouble());
 		fuelometer.setValue(value.getFuel().getFuelAsDouble());

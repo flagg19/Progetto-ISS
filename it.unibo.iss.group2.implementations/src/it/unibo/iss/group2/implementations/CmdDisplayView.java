@@ -1,8 +1,8 @@
 package it.unibo.iss.group2.implementations;
 
 import it.unibo.iss.group2.implementations.measures.Speed;
-import it.unibo.iss.group2.interfaces.cmd.ButtonLabels;
 import it.unibo.iss.group2.interfaces.measures.ISpeed;
+import it.unibo.iss.group2.interfaces.messages.MessageLabels;
 import it.unibo.iss.group2.interfaces.monitor.ISyncMonitor;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ import java.awt.event.ActionListener;
  * @author Alessandro
  *
  */
-public class CmdDisplayView {
+public class CmdDisplayView extends JFrame {
 	
 	private ISyncMonitor syncMonitor;
 	
@@ -80,23 +80,38 @@ public class CmdDisplayView {
 		this.lblStatus.setText("Command display initialization done.");
 	    
 	    // BUTTON decSpeed
-		this.btnDecSpeed = addButton("Dec speed", "Decrease drone speed", ButtonLabels.DEC_SPEED, true);
+		this.btnDecSpeed = addButton("Dec speed", "Decrease drone speed", MessageLabels.DEC_SPEED, true);
 		
 		// BUTTON incSpeed
-		this.btnIncSpeed = addButton("Inc speed", "Increase drone speed", ButtonLabels.INC_SPEED, true);
+		this.btnIncSpeed = addButton("Inc speed", "Increase drone speed", MessageLabels.INC_SPEED, true);
 	    
 	    // BUTTON setSpeed
-		this.btnSetSpeed = addButton("Set speed", "Set drone speed", ButtonLabels.SET_SPEED, true);
+		this.btnSetSpeed = addButton("Set speed", "Set drone speed", MessageLabels.SET_SPEED, true);
 	    
 	    // BUTTON startMission
-		this.btnStartMission = addButton("Start mission", "Start drone mission", ButtonLabels.START, true);
+		this.btnStartMission = addButton("Start mission", "Start drone mission", MessageLabels.START, true);
 	    
 	    // BUTTON stopMission
-		this.btnStopMission = addButton("Stop mission", "Stop drone mission", ButtonLabels.STOP, true);
+		this.btnStopMission = addButton("Stop mission", "Stop drone mission", MessageLabels.STOP, true);
 	    
 	    this.setPnlCommand();
 	    this.setPnlMain();
-	   
+	  
+	    setVisible(true);
+	      
+	    GroupLayout layout = new GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+            .addComponent(this.getPanelMain(), javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(this.getPanelMain(), javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        pack();
 	}
 	
 	/**
@@ -123,7 +138,7 @@ public class CmdDisplayView {
 	 * @param name
 	 * @return
 	 */
-	public static CmdDisplayView istantiate(final String name, ISyncMonitor syncMonitor) {
+	public static CmdDisplayView instantiate(final String name, ISyncMonitor syncMonitor) {
 		return new CmdDisplayView(name, syncMonitor);
 	}
     
@@ -183,7 +198,7 @@ public class CmdDisplayView {
 	    this.getPanelMain().add(this.lblStatus, BorderLayout.PAGE_END);
 	}
 	
-	private JButton addButton(String label, String tooltip, final ButtonLabels buttonLabel, boolean enabled) {
+	private JButton addButton(String label, String tooltip, final MessageLabels buttonLabel, boolean enabled) {
 		JButton temp = new JButton();
 		temp.setToolTipText(tooltip);
 		temp.setText(label);
@@ -197,7 +212,7 @@ public class CmdDisplayView {
 		return temp;
 	}
 	
-	public String getSpeed() {
-		return txtSpeed.getText();
+	public Speed getSpeed() {
+		return new Speed(Double.parseDouble(txtSpeed.getText()));
 	}
 }
