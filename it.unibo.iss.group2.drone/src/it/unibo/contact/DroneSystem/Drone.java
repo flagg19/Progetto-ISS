@@ -1,5 +1,6 @@
 package it.unibo.contact.DroneSystem;
 
+import java.io.FileOutputStream;
 import java.util.HashMap;
 
 import it.unibo.iss.group2.implementations.measures.Speed;
@@ -59,5 +60,13 @@ public class Drone extends DroneSupport {
 	@Override
 	protected Speed hl_speedFromCommand(Command cmdSetString) throws Exception {
 		return new Speed(0).dejsonify(((SetSpeed)cmdSetString).getParameter());
+	}
+
+	@Override
+	protected void hl_takePicture() throws Exception {
+		FileOutputStream fos = new FileOutputStream("files/" + nFiles + "_captured.status.json",false);
+		fos.write(statusDrone.jsonify().getBytes());
+		fos.close();
+		nFiles++;
 	}
 }

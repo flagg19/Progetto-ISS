@@ -11,7 +11,7 @@ Subject gaugeDisplay external;
 Invitation command;		// Generico, il contenuto permette di discriminare tra i singoli comandi
 Request initialSpeed;	
 Dispatch misuration;
-Request streamPhoto; 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
+Request stream; 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
 
 //Interactions
 droneReceiveInitialSpeed: drone grant initialSpeed support=TCP [host="localhost" port=8060];
@@ -20,8 +20,8 @@ droneReceiveCommand: drone accept command support=TCP [host="localhost" port=806
 droneSendMisuration: drone forward misuration to gaugeDisplay;
 gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="localhost" port=8090];
 
-droneSendStream: drone demand streamPhoto to cmdDisplay;
-cmdDisplayReceiveSendStream: cmdDisplay grant streamPhoto support=TCP [host="localhost" port=8020];
+droneGrant: drone grant stream support=TCP [host="localhost" port=8020];
+cmdDisplayRequest: cmdDisplay demand stream to drone;
 
 //Behaviour
 BehaviorOf drone {
@@ -36,6 +36,10 @@ BehaviorOf drone {
 	// Nota: la speed in questo contesto non è un valore rilevato istantaneamente da un sensore ma è il valore alla quale il drone è obbligato ad andare
 	var it.unibo.iss.group2.implementations.measures.Speed speedDrone = new it.unibo.iss.group2.implementations.measures.Speed(0)
 	var it.unibo.iss.group2.implementations.measures.Status statusDrone = null
+	
+	var int nIter = 0
+	var int nFiles = 0
+	var String sourceFilePath = ""
 			
 	action java.util.HashMap<String, String> initLabels()
 	action it.unibo.iss.group2.implementations.messages.Command hl_commandFromJSON(String jsonString)
@@ -44,6 +48,7 @@ BehaviorOf drone {
 	action it.unibo.iss.group2.implementations.measures.Status hl_readStatus()
 	action void delay()
 	action void accelerate()
+	action void hl_takePicture()
 	
 	state droneInit initial
 		showMsg("----- DRONE START -----")
@@ -51,7 +56,7 @@ BehaviorOf drone {
 		onMessage initialSpeed transitTo droneSetInitialSpeed
 	endstate
 	
-	state droneSetInitialSpeed
+	state droneSetInitialSpeed onException droneError
 		set speedDrone = call speedDrone.dejsonify(call cleanString(code.curInputMsgContent))
 		set initialSpeedValue = "[SUCCESS] Initial speed set to: " + call speedDrone.getSpeedAsDouble()
 		call accelerate()
@@ -59,7 +64,7 @@ BehaviorOf drone {
 		goToState droneStill
 	endstate
 	
-	state droneStill
+	state droneStill onException droneError
 		doIn droneReceiveCommand()
 		set commandMsg = exec hl_commandFromJSON(call cleanString(code.curInputMsgContent))
 		showMsg(call commandMsg.getContent())
@@ -70,11 +75,13 @@ BehaviorOf drone {
 		goToState droneStill 
 	endstate
 	
-	state droneFly
+	state droneFly onException droneError
 		// Wait DTF 
 		exec delay()
 		// Read status/ use resources
 		set statusDrone = call hl_readStatus()
+		// Take picture
+		call hl_takePicture()
 		// Send status to Gauge Display
 		doOut droneSendMisuration(call statusDrone.jsonify())
 		showMsg("Inviato: "+call statusDrone.jsonify())
@@ -83,7 +90,7 @@ BehaviorOf drone {
 		goToState droneFly
 	endstate
 	
-	state droneProcessCommand
+	state droneProcessCommand onException droneError
 		doIn droneReceiveCommand()
 		set commandMsg = exec hl_commandFromJSON(call cleanString(code.curInputMsgContent))
 		showMsg("Process command: " +  commandMsg)
@@ -117,13 +124,49 @@ BehaviorOf drone {
 		goToState droneFly
 	endstate
 	
-	state droneSendStream
+	state droneSendStream onException droneError
 		
-		goToState droneStop
+		doInOut droneGrant();
+		goToState  sourceCheckForRemainingFiles
 	endstate
+	 
+	state sourceCheckForRemainingFiles onException droneError
+		if{ nIter < nFiles }
+		{ 
+			showMsg("Altri file: " + nIter);
+			replyStepToRequest stream("MORE FILES");
+			goToState sourceSendFileContent
+		}
+		showMsg("Finiti files")
+		goToState sourceSendEndStream
+	endstate
+			
+	state sourceSendFileContent onException droneError
+ 		showMsg("2) send file content (FOR TCP ONLY)")
+ 		set sourceFilePath = "files/captured.jpg"
+ 		call curRequest.replyStepContentToCaller( sourceFilePath  )
+ 		showMsg("3) send endOfAnswerSysMsg "   )  
+   		replyStepToRequest stream("END OF PHOTO")
+   		set sourceFilePath = "files/" + nIter + "_captured.status.json" 
+   		call curRequest.replyStepContentToCaller( sourceFilePath  )
+   		replyStepToRequest stream("END OF JSON") 
+ 		set nIter = nIter + const.1
+ 	 	goToState sourceCheckForRemainingFiles
+	endstate
+	
+	state sourceSendEndStream onException droneError
+		showMsg("4) send END MSG "   )
+		replyStepToRequest stream("END STREAM")		
+		goToState droneStop  
+	endstate	
 	
 	state droneStop
 		showMsg("----- DRONE STOP-----")
+		transitToEnd
+	endstate
+	
+	state droneError   
+		showMsg("ERROR ... " + code.curException)
 		transitToEnd
 	endstate	
 }

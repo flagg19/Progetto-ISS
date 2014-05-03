@@ -1,5 +1,8 @@
 package it.unibo.iss.group2.implementations.monitor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import it.unibo.iss.group2.interfaces.messages.MessageLabels;
 import it.unibo.iss.group2.interfaces.monitor.ISyncMonitor;
 
@@ -8,7 +11,7 @@ import it.unibo.iss.group2.interfaces.monitor.ISyncMonitor;
  */
 public class SyncMonitor implements ISyncMonitor {
 	
-	MessageLabels lastPressedButton;
+	List<MessageLabels> pressedButtonQueue;
 	
 	static public SyncMonitor instantiate () {
 		return new SyncMonitor();
@@ -16,12 +19,11 @@ public class SyncMonitor implements ISyncMonitor {
 	
 	public SyncMonitor() {
 		
-		lastPressedButton = MessageLabels.NONE;
+		pressedButtonQueue = new ArrayList<MessageLabels>();
 	}
 	
 	public synchronized MessageLabels waitForButton() {
-		
-		while (lastPressedButton == MessageLabels.NONE)
+		while (pressedButtonQueue.size() == 0)
 		{
 			try {
 				this.wait();
@@ -29,14 +31,12 @@ public class SyncMonitor implements ISyncMonitor {
 				e.printStackTrace();
 			}
 		}
-		MessageLabels returnButton = lastPressedButton;
-		lastPressedButton = MessageLabels.NONE;
+		MessageLabels returnButton = pressedButtonQueue.remove(0);
 		return returnButton;
 	}
 	
 	public synchronized void release(MessageLabels pressedButton) {
-		
-		lastPressedButton = pressedButton;
+		pressedButtonQueue.add(pressedButton);
 		this.notify();
 	}
 }

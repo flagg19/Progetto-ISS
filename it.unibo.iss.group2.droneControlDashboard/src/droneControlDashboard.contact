@@ -12,7 +12,7 @@ Invitation command;		// Generico, il contenuto permette di discriminare tra i si
 Request initialSpeed;
 Dispatch misuration;	// Questa roba contiene un droneState	
 
-Request streamPhoto; 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
+Request stream; 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
 
 //Interactions
 cmdDisplaySendInitialSpeed: cmdDisplay demand initialSpeed to drone;
@@ -21,8 +21,8 @@ droneReceiveInitialSpeed: drone grant initialSpeed support=TCP [host="localhost"
 cmdDisplaySendCommand: cmdDisplay ask command to drone;
 droneReceiveCommand: drone accept command support=TCP [host="localhost" port=8060]; 
 
-droneSendStream: drone demand streamPhoto to cmdDisplay;
-cmdDisplayReceiveStream: cmdDisplay grant streamPhoto support=TCP [host="localhost" port=8020];
+cmdDisplayRequest: cmdDisplay demand stream to drone;
+droneGrant: drone grant stream support=TCP [host="localhost" port=8020];
 
 droneSendMisuration: drone forward misuration to gaugeDisplay;
 gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="localhost" port=8090];
@@ -36,10 +36,17 @@ BehaviorOf cmdDisplay {
 	var java.util.HashMap<String, it.unibo.iss.group2.interfaces.messages.MessageLabels> labels = null		
 	var String contentMessage = ""
 	
+	var fileRequestMsg = ""
+	var it.unibo.is.interfaces.platforms.IRawBuffer rowContent = null
+	var int curDim = 0 
+	var fileDestPath = ""
 	var it.unibo.is.interfaces.IContentSegmentable fileToBuild = null
+	var int nIter = 0
 	
 	action java.util.HashMap<String, it.unibo.iss.group2.interfaces.messages.MessageLabels> initLabels()
-	
+	action String getDestFilePath(String receivedFileName)
+ 	action it.unibo.is.interfaces.IContentSegmentable createFileToBuild(String fileDestPath)
+ 	
 	state cmdInit initial
 		showMsg("----- COMMAND DISPLAY INIT -----");
 		// Inizializzazione strutture dati ausiliarie 
@@ -49,7 +56,7 @@ BehaviorOf cmdDisplay {
 		goToState cmdSetInitialSpeedAwait
 	endstate
 
-	state cmdSetInitialSpeedAwait
+	state cmdSetInitialSpeedAwait onException cmdError
 		showMsg("Waiting for SET_SPEED button");
 		set buttonLabel = call syncMonitor.waitForButton()
 		if {buttonLabel != labels.get("SET_SPEED")}
@@ -60,7 +67,7 @@ BehaviorOf cmdDisplay {
 		goToState cmdSetInitialSpeed
 	endstate
 	
-	state cmdSetInitialSpeed
+	state cmdSetInitialSpeed onException cmdError
 		set contentMessage = eval guiCmd.getSpeed().jsonify()
 		doOutIn cmdDisplaySendInitialSpeed(contentMessage)
 		// Attesa risposta (request/response) del drone
@@ -69,7 +76,7 @@ BehaviorOf cmdDisplay {
 		goToState cmdPreMission
 	endstate
 	
-	state cmdPreMission
+	state cmdPreMission onException cmdError
 		showMsg("Waiting for START button");
 		set buttonLabel = call syncMonitor.waitForButton()
 		if {buttonLabel != labels.get("START")}
@@ -80,20 +87,20 @@ BehaviorOf cmdDisplay {
 		goToState cmdStartMission
 	endstate
 	
-	state cmdStartMission
+	state cmdStartMission onException cmdError
 		set commandMsg = call it.unibo.iss.group2.implementations.messages.Start.instantiate()
 		doOutIn cmdDisplaySendCommand(call commandMsg.jsonify())
 		acquireAckFor command
 		goToState cmdIdle
 	endstate
 	
-	state cmdIdle
+	state cmdIdle onException cmdError
 		showMsg("Waiting for any button");
 		set buttonLabel = call syncMonitor.waitForButton()
 		goToState cmdProcessCommand
 	endstate
 	
-	state cmdProcessCommand
+	state cmdProcessCommand onException cmdError
 		if {buttonLabel == labels.get("STOP")}
 		{
 			set commandMsg = call it.unibo.iss.group2.implementations.messages.Stop.instantiate();
@@ -128,15 +135,63 @@ BehaviorOf cmdDisplay {
 		goToState cmdIdle
 	endstate
 	
-	state cmdReceiveStream
-		// TODO: ricevere in qualche modo lo stream delle foto
-		goToState cmdEnd
+	state cmdReceiveStream onException cmdError
+		doOutIn cmdDisplayRequest("") 
+		goToState receiveFileContent
 	endstate
 	
+  	state receiveFileContent onException cmdError
+  		showMsg("Si bloccherˆ?")
+  		acquireAnswerFor stream
+  		set contentMessage = code.curReplyContent
+  		showMsg("Receive file content: " + contentMessage)
+ 		if {"'END STREAM '" == contentMessage} { goToState cmdEnd }
+ 		set fileRequestMsg = nIter + "_captured.picture.jpg"
+ 		set fileDestPath = exec getDestFilePath(fileRequestMsg)  
+ 		set fileToBuild = exec createFileToBuild(fileDestPath)
+		showMsg("2) fileRequestMsg= " + fileRequestMsg  + " fileDestPath=" + fileDestPath)
+		goToState receivePhotoChunkContent
+  	endstate
+  	
+ 	state receivePhotoChunkContent onException cmdError
+		set rowContent = call curAcquireOneReply.acquireRawReply()  
+		set curDim = call rowContent.getDim()
+  		if {  curDim == 0 }   {
+  			showMsg("3) Foto finita, in attesa di json");
+  			call fileToBuild.closeReceiving();
+  			set fileRequestMsg = nIter + "_captured.status.json";
+ 			set fileDestPath = exec getDestFilePath(fileRequestMsg);
+  			set fileToBuild = exec createFileToBuild(fileDestPath); 
+  			acquireAnswerFor stream;  
+  			goToState receiveStateChunkContent
+  		}
+  		call fileToBuild.newSegment(rowContent)
+		goToState receivePhotoChunkContent
+ 	endstate 
+ 	
+ 	state receiveStateChunkContent onException cmdError
+		set rowContent = call curAcquireOneReply.acquireRawReply()  
+		set curDim = call rowContent.getDim()
+  		if {  curDim == 0 }   {
+  			showMsg("3) Json finito");
+  			call fileToBuild.closeReceiving(); 
+  			acquireAnswerFor stream;  
+  			set nIter = nIter + const.1;
+  			goToState receiveFileContent
+  		}
+  		call fileToBuild.newSegment(rowContent)
+		goToState receiveStateChunkContent
+ 	endstate	    
+ 
 	state cmdEnd
 		showMsg("----- COMMAND DISPLAY STOP -----")
 		transitToEnd
-	endstate	
+	endstate
+	
+	state cmdError 
+		showMsg("ERROR ... " + code.curException)
+		transitToEnd
+	endstate		
 }
 
 BehaviorOf gaugeDisplay {
