@@ -4,4 +4,5 @@ public interface IStatus {
 	IFuel getFuel();
 	IPosition getPosition();
 	ISpeed getSpeed();
+	boolean stopCondition();
 }

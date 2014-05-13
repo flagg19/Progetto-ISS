@@ -2,6 +2,7 @@ package it.unibo.iss.group2.implementations.measures;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import it.unibo.iss.group2.interfaces.globals.Globals;
 import it.unibo.iss.group2.interfaces.measures.IDistance;
 import it.unibo.iss.group2.interfaces.measures.IFuel;
 import it.unibo.iss.group2.interfaces.measures.IPosition;
@@ -48,6 +49,11 @@ public class Status implements IStatus, IMessage {
 	@Override
 	public ISpeed getSpeed() {
 		return speed;
+	}
+	
+	@Override
+	public boolean stopCondition() {
+		return fuel.getFuelAsDouble() <= Globals.MIN_FUEL;
 	}
 
 	@Override

@@ -11,7 +11,7 @@ Subject drone external;
 Invitation command;		// Generico, il contenuto permette di discriminare tra i singoli comandi
 Request initialSpeed;
 Dispatch misuration;	// Questa roba contiene un droneState	
-
+Dispatch automaticStop;
 Request stream; 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
 
 //Interactions
@@ -26,6 +26,9 @@ droneGrant: drone grant stream support=TCP [host="localhost" port=8020];
 
 droneSendMisuration: drone forward misuration to gaugeDisplay;
 gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="localhost" port=8090];
+
+droneSendAutomaticStop: drone forward automaticStop to gaugeDisplay;
+gaugeDisplayReceiveAutomaticStop: gaugeDisplay serve automaticStop support=TCP[host="localhost" port=8090];
 
 //Behaviour
 BehaviorOf cmdDisplay {
@@ -207,6 +210,7 @@ BehaviorOf gaugeDisplay {
 	endstate
 	
 	state gdIdle
+		onMessage automaticStop transitTo gdNotifyAutomaticStop  
 		onMessage misuration transitTo gdUpdateView
 	endstate
 	
@@ -214,6 +218,11 @@ BehaviorOf gaugeDisplay {
 		showMsg(call cleanString(code.curInputMsgContent))
 		set statusDrone = call statusDrone.dejsonify(call cleanString(code.curInputMsgContent)) 
 		call guiGauge.updateDisplay(statusDrone)
+		goToState gdIdle
+	endstate
+	
+	state gdNotifyAutomaticStop
+		showMsg("Automatic stop: premi stop")
 		goToState gdIdle
 	endstate
 	

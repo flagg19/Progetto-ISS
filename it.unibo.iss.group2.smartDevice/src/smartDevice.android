@@ -1,0 +1,38 @@
+AndroidSystem smartDeviceSystem
+avd 8 permissions INTERNET
+package it.unibo.android.SmartDeviceSystem
+
+action startListening category "android.intent.category.DEFAULT"
+
+Activity GaugeActivity launchable
+	action startListening
+	useLayout mainlayout;
+	
+<Layout> name mainlayout as 
+	<LinearLayout> gaugelayout
+		orientation VERTICAL
+		width FILL_PARENT
+		height WRAP_CONTENT
+		
+		<Button> startListening //Set the application in listening mode
+			width FILL_PARENT
+			height WRAP_CONTENT
+			text "Start waiting drone"
+			onClickDoAction startListening
+		</Button>
+		
+		<ScrollView> scrollView
+			width FILL_PARENT
+			height FILL_PARENT
+			weight 0.0
+			<TextView> output
+				width FILL_PARENT
+				height WRAP_CONTENT
+				text ""
+				size 10
+				background BLUE
+				textColor YELLOW
+			</TextView>
+		</ScrollView>
+	</LinearLayout>
+</Layout>

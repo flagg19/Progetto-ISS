@@ -69,4 +69,9 @@ public class Drone extends DroneSupport {
 		fos.close();
 		nFiles++;
 	}
+	
+	@Override
+	protected String pippo(String pippo) {
+		return pippo.replaceAll("\"", "¤");
+	}
 }

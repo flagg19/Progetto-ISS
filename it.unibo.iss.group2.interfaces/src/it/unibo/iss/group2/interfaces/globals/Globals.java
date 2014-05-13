@@ -7,7 +7,6 @@ public class Globals {
 	public final static double DS = 10;
 	
 	// ODOMETER
-	public final static double MIN_DISTANCE = 0;
 	public final static double MAX_DISTANCE = 2000;
 	
 	// FUEL
@@ -16,7 +15,7 @@ public class Globals {
 	public final static double CONSUMPTION_PARAM = 30;
 	
 	// LOCTRACKER
-	public static final double INITIAL_LATITUDE = 40.400;
+	public static final double INITIAL_LATITUDE = 0.400;
 	public static final double INITIAL_LONGITUDE = 74.061;
 	
 	// DTF

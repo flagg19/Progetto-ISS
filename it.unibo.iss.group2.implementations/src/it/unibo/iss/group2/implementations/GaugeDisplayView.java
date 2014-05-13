@@ -59,7 +59,7 @@ public class GaugeDisplayView extends JFrame {
 		this.name = name;
 		this.fuelometer = Fuelometer.istantiate("Fuelometer", "l", Globals.MIN_FUEL, Globals.MAX_FUEL);
 		this.speedometer = Speedometer.istantiate("Speedometer", "km/h", Globals.MIN_SPEED, Globals.MAX_SPEED);
-		this.odometer = Odometer.istantiate("Odometer", "km", Globals.MIN_DISTANCE, Globals.MAX_DISTANCE);
+		this.odometer = Odometer.istantiate("Odometer", "km", 0, Globals.MAX_DISTANCE);
 		this.locTracker = LocTracker.istantiate("Loctracker");
 
 		this.pnlMain = new JPanel();

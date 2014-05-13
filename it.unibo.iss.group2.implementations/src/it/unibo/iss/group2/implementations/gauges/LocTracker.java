@@ -5,6 +5,8 @@ import org.jdesktop.swingx.JXMapKit.DefaultProviders;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
+import it.unibo.iss.group2.interfaces.globals.Globals;
+
 import java.awt.EventQueue;
 
 
@@ -55,7 +57,7 @@ public class LocTracker extends Gauge<GeoPosition> {
 	    this.jxmMap.setDefaultProvider(DefaultProviders.OpenStreetMaps);
 	    
 	    // Imposto la posizione di partenza e lo Zoom del componente grafico di visualizzazione della mappa
-	    this.jxmMap.setAddressLocation(new GeoPosition(0, 0));
+	    this.jxmMap.setAddressLocation(new GeoPosition(Globals.INITIAL_LATITUDE, Globals.INITIAL_LONGITUDE));
 	    this.jxmMap.setZoom(locTrackerZoom);
 	    
 	    this.jxmMap.setZoomSliderVisible(true);

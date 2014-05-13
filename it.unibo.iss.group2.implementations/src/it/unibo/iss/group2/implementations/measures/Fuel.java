@@ -20,8 +20,8 @@ public class Fuel implements IFuel, IMessage {
 	}	
 	
 	private double constraints(double fuel) { 
-		if (fuel < Globals.MIN_FUEL)
-			fuel = Globals.MIN_FUEL;
+		if (fuel < 0)
+			fuel = 0;
 		
 		return fuel;
 	}

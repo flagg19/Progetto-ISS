@@ -20,8 +20,8 @@ public class Distance implements IDistance, IMessage {
 	}	
 	
 	private double constraints(double distance) { 
-		if (distance < Globals.MIN_DISTANCE)
-			distance = Globals.MIN_DISTANCE;
+		if (distance < 0)
+			distance = 0;
 		
 		return distance;
 	}

@@ -7,10 +7,13 @@ Subject drone -w;
 
 Subject cmdDisplay external;
 Subject gaugeDisplay external;
+Subject smartGaugeDisplay external;
 
 Invitation command;		// Generico, il contenuto permette di discriminare tra i singoli comandi
 Request initialSpeed;	
 Dispatch misuration;
+Signal misurationS;
+Dispatch automaticStop;
 Request stream; 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
 
 //Interactions
@@ -19,6 +22,13 @@ droneReceiveCommand: drone accept command support=TCP [host="localhost" port=806
 
 droneSendMisuration: drone forward misuration to gaugeDisplay;
 gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="localhost" port=8090];
+
+//droneSendMisurationS: drone forward misuration to smartGaugeDisplay;
+//gaugeDisplayReceiveMisurationS: smartGaugeDisplay serve misuration support=TCP[host="192.168.1.103" port=8090];
+droneSendMisurationS: drone emit misurationS;
+
+droneSendAutomaticStop: drone forward automaticStop to gaugeDisplay;
+gaugeDisplayReceiveAutomaticStop: gaugeDisplay serve automaticStop support=TCP[host="localhost" port=8090];
 
 droneGrant: drone grant stream support=TCP [host="localhost" port=8020];
 cmdDisplayRequest: cmdDisplay demand stream to drone;
@@ -50,8 +60,13 @@ BehaviorOf drone {
 	action void accelerate()
 	action void hl_takePicture()
 	
+	action String pippo(String pippo)
+	
 	state droneInit initial
 		showMsg("----- DRONE START -----")
+		
+			//doOut droneSendMisurationS("okok")
+							
 		set messageLabels = call initLabels()
 		onMessage initialSpeed transitTo droneSetInitialSpeed
 	endstate
@@ -83,11 +98,34 @@ BehaviorOf drone {
 		// Take picture
 		call hl_takePicture()
 		// Send status to Gauge Display
+		//doOut droneSendMisurationS()
+
 		doOut droneSendMisuration(call statusDrone.jsonify())
+		doOut droneSendMisurationS(call pippo(call statusDrone.jsonify()))
+		
 		showMsg("Inviato: "+call statusDrone.jsonify())
+		
+		if {statusDrone.stopCondition()}
+		{
+			goToState droneAutomaticStop
+		}
 		// Are there any messages?
 		onMessage? command goToState droneProcessCommand
 		goToState droneFly
+	endstate
+	
+	state droneAutomaticStop onException droneError
+		doOut droneSendAutomaticStop("automaticStop")
+		showMsg("Inviato: automaticStop")
+		doIn droneReceiveCommand()
+		set commandMsg = exec hl_commandFromJSON(call cleanString(code.curInputMsgContent))
+		showMsg("Process command: " +  commandMsg)
+		if {messageLabels.get("STOP") == commandMsg.getContent()}
+		{
+			showMsg("[COMMAND] STOP");
+			goToState droneSendStream
+		}
+		goToState droneAutomaticStop
 	endstate
 	
 	state droneProcessCommand onException droneError

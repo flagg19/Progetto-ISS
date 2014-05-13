@@ -1,0 +1,49 @@
+ContactSystem SmartDeviceSystem spaceUpdater [host="192.168.43.67" port=8070];
+
+// Structure
+Context ctxSmartDevice;
+
+Subject smartGaugeDisplay context ctxSmartDevice;
+Subject drone external;
+
+Signal misurationS;	// Questa roba contiene un droneState	
+
+//Interactions
+// qui ci vuole un commento casuale
+smartGaugeDisplayReceiveMisuration: smartGaugeDisplay sense misurationS;
+
+
+//Behaviour
+BehaviorOf smartGaugeDisplay {
+	//var it.unibo.iss.group2.implementations.measures.Status statusDrone = new it.unibo.iss.group2.implementations.measures.Status()
+	
+	action String cleanString(String jsonString)
+	
+	state gdInit initial
+		showMsg("----- SMART GAUGE DISPLAY START -----")
+		goToState gdIdle
+	endstate
+	
+	state gdIdle
+		showMsg("----- Waiting for drone state -----")
+		onMessage misurationS transitTo gdUpdateView
+	endstate
+	
+	state gdUpdateView
+		showMsg(code.curInputMsgContent)
+
+		//showMsg(call cleanString(code.curInputMsgContent))
+		//set statusDrone = call statusDrone.dejsonify(call cleanString(code.curInputMsgContent)) 
+		goToState gdIdle
+	endstate
+	
+	state gdNotifyAutomaticStop
+		showMsg("Automatic stop: premi stop")
+		goToState gdIdle
+	endstate
+	
+	state gdEnd
+		showMsg("----- rimando indietro -----")
+		transitToEnd
+	endstate	
+}
