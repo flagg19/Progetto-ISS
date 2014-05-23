@@ -1,4 +1,4 @@
-ContactSystem SmartDeviceSystem spaceUpdater [host="192.168.43.67" port=8070];
+ContactSystem SmartDeviceSystem spaceUpdater [host="192.168.1.102" port=8070];
 
 // Structure
 Context ctxSmartDevice;
@@ -6,10 +6,11 @@ Context ctxSmartDevice;
 Subject smartGaugeDisplay context ctxSmartDevice;
 Subject drone external;
 
+
 Signal misurationS;	// Questa roba contiene un droneState	
 
 //Interactions
-// qui ci vuole un commento casuale
+testSignal: smartGaugeDisplay emit misurationS;
 smartGaugeDisplayReceiveMisuration: smartGaugeDisplay sense misurationS;
 
 
@@ -21,6 +22,7 @@ BehaviorOf smartGaugeDisplay {
 	
 	state gdInit initial
 		showMsg("----- SMART GAUGE DISPLAY START -----")
+		//doOut testSignal("caspiterella");
 		goToState gdIdle
 	endstate
 	
@@ -37,13 +39,8 @@ BehaviorOf smartGaugeDisplay {
 		goToState gdIdle
 	endstate
 	
-	state gdNotifyAutomaticStop
-		showMsg("Automatic stop: premi stop")
-		goToState gdIdle
-	endstate
-	
 	state gdEnd
-		showMsg("----- rimando indietro -----")
+		showMsg("----- SMART GAUGE DISPLAY STOP -----")
 		transitToEnd
 	endstate	
 }
