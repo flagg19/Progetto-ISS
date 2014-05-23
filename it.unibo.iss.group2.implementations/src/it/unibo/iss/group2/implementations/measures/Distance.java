@@ -38,7 +38,7 @@ public class Distance implements IDistance, IMessage {
 	}
 
 	@Override
-	public IMessage dejsonify(String jsonString) {
+	public Distance dejsonify(String jsonString) {
 		try {
 			JSONObject obj = new JSONObject(jsonString);
 			double receiveContent = obj.getDouble("distance");

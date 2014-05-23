@@ -38,7 +38,7 @@ public class Fuel implements IFuel, IMessage {
 	}
 
 	@Override
-	public IMessage dejsonify(String jsonString) {
+	public Fuel dejsonify(String jsonString) {
 		try {
 			JSONObject obj = new JSONObject(jsonString);
 			double receiveContent = obj.getDouble("fuel");

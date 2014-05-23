@@ -37,7 +37,7 @@ public class Position implements IPosition, IMessage {
 	}
 
 	@Override
-	public IMessage dejsonify(String jsonString) {
+	public Position dejsonify(String jsonString) {
 		try {
 			JSONObject obj = new JSONObject(jsonString);
 			double receiveLatitude = obj.getDouble("latitude");
