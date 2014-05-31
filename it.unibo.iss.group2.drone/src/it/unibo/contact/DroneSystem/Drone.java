@@ -71,7 +71,8 @@ public class Drone extends DroneSupport {
 	}
 	
 	@Override
-	protected String pippo(String pippo) {
-		return pippo.replaceAll("\"", "¤");
+	protected String hl_replaceQuotes(String quotedString) {
+		String replacingSymbol = "¤";
+		return quotedString.replaceAll("\"", replacingSymbol);
 	}
 }

@@ -58,7 +58,7 @@ BehaviorOf drone {
 	action void accelerate()
 	action void hl_takePicture()
 	
-	action String pippo(String pippo)
+	action String hl_replaceQuotes(String quotedString)
 	
 	state droneInit initial
 		showMsg("----- DRONE START -----")
@@ -100,7 +100,7 @@ BehaviorOf drone {
 		// Send status to Gauge Display
 		doOut droneSendMisuration(call statusDrone.jsonify())
 		// Send status to Smart Devices
-		doOut droneSendMisurationS(call pippo(call statusDrone.jsonify()))
+		doOut droneSendMisurationS(call hl_replaceQuotes(call statusDrone.jsonify()))
 		
 		showMsg("Inviato: "+call statusDrone.jsonify())
 		
