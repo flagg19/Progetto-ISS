@@ -15,8 +15,8 @@ public class Globals {
 	public final static double CONSUMPTION_PARAM = 30;
 	
 	// LOCTRACKER
-	public static final double INITIAL_LATITUDE = 0.400;
-	public static final double INITIAL_LONGITUDE = 74.061;
+	public static final double INITIAL_LATITUDE = 44.012379;
+	public static final double INITIAL_LONGITUDE = 12.647552;
 	
 	// DTF
 	public static final int DTF = 5;
