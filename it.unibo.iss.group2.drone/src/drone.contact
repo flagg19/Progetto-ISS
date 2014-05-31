@@ -23,8 +23,6 @@ droneReceiveCommand: drone accept command support=TCP [host="localhost" port=806
 droneSendMisuration: drone forward misuration to gaugeDisplay;
 gaugeDisplayReceiveMisuration: gaugeDisplay serve misuration support=TCP[host="localhost" port=8090];
 
-//droneSendMisurationS: drone forward misuration to smartGaugeDisplay;
-//gaugeDisplayReceiveMisurationS: smartGaugeDisplay serve misuration support=TCP[host="192.168.1.103" port=8090];
 droneSendMisurationS: drone emit misurationS;
 
 droneSendAutomaticStop: drone forward automaticStop to gaugeDisplay;
@@ -64,9 +62,11 @@ BehaviorOf drone {
 	
 	state droneInit initial
 		showMsg("----- DRONE START -----")
-		
-			//doOut droneSendMisurationS("okok")
-							
+		/*
+		// For signal/smart device test only
+		doOut droneSendMisurationS("X")
+		doOut droneSendMisurationS("Y")
+		*/
 		set messageLabels = call initLabels()
 		onMessage initialSpeed transitTo droneSetInitialSpeed
 	endstate
@@ -98,9 +98,8 @@ BehaviorOf drone {
 		// Take picture
 		call hl_takePicture()
 		// Send status to Gauge Display
-		//doOut droneSendMisurationS()
-
 		doOut droneSendMisuration(call statusDrone.jsonify())
+		// Send status to Smart Devices
 		doOut droneSendMisurationS(call pippo(call statusDrone.jsonify()))
 		
 		showMsg("Inviato: "+call statusDrone.jsonify())
