@@ -7,7 +7,6 @@ import it.unibo.contact.SmartDeviceSystem.CtxSmartDeviceMain;
 public class GaugeActivity extends GaugeActivitySupport {
 
 	protected CtxSmartDeviceMain context = null;
-
 	
 	@Override
 	protected void startListening(String inputValue, Bundle b) throws Exception {

@@ -25,6 +25,5 @@ public enum MessageLabels {
 		else
 			return NONE;
 	}
-
 }
 

@@ -14,7 +14,7 @@ Activity GaugeActivity launchable
 		width FILL_PARENT
 		height WRAP_CONTENT
 		
-		<Button> startListening //Set the application in listening mode
+		<Button> startListening
 			width FILL_PARENT
 			height WRAP_CONTENT
 			text "Start waiting drone"

@@ -82,8 +82,7 @@ public class CtxSmartDeviceAndroidMain extends CtxSmartDeviceMain {
 	@Override
 	protected void configureSubjects() {
 		try 
-		{
-			//Different devices with (possibly) different name 
+		{ 
 			smartGaugeDisplay = new SmartGaugeDisplay("SmartDevice" + SystemClock.uptimeMillis(), baseAct);
 			smartGaugeDisplay.setEnv(env);
 			smartGaugeDisplay.initInputSupports();			

@@ -16,8 +16,7 @@ public class PositionSensor implements ISensor<IPosition> {
 	
 	@Override
 	public IPosition getValue(ISpeed speed) {
-		// Shift della posizione soltanto sulla coordinata latitudine
-		Double shiftLat = -0.0005;//speed.getSpeedAsDouble() * Globals.DTF;
+		Double shiftLat = -0.0005;
 		Double shiftLong = 0.0005;
 		GeoPosition tempPosition = curPosition.getPositionAsGeoPosition();
 		curPosition = new Position(new GeoPosition(tempPosition.getLatitude() + shiftLat, tempPosition.getLongitude() + shiftLong));

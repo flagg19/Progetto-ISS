@@ -72,7 +72,7 @@ public class Drone extends DroneSupport {
 	
 	@Override
 	protected String hl_replaceQuotes(String quotedString) {
-		String replacingSymbol = "¤";
+		String replacingSymbol = "_quote_token_";
 		return quotedString.replaceAll("\"", replacingSymbol);
 	}
 }

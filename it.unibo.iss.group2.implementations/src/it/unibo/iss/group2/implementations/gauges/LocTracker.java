@@ -1,8 +1,7 @@
 package it.unibo.iss.group2.implementations.gauges;
 
-import org.jdesktop.swingx.JXMapKit;					// From swingx-ws-1.0.jar
+import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.JXMapKit.DefaultProviders;
-import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 import it.unibo.iss.group2.interfaces.globals.Globals;
@@ -10,26 +9,15 @@ import it.unibo.iss.group2.interfaces.globals.Globals;
 import java.awt.EventQueue;
 
 
-/**
- * Classe utilizzata per visualizzare sulla GUI il componente JXMapKit.
- * Visualizza tramite immagini ricavate da GoogleMaps la posizione del drone attuale
- * e il percorso realizzato.
- * @author Alessandro
- *
- */
 public class LocTracker extends Gauge<GeoPosition> {
 
-	// JComponent della GUI relativa al locTracker
+	// GUI JComponent related to the locTracker
 	private final JXMapKit       jxmMap;	
 	
 	public static int locTrackerZoom = 1;
 	public static int locTrackerWidth = 720;
 	public static int locTrackerHeight = 194;
 	
-	/**
-	 * Inizializza i componenti relativi all GUI
-	 * @param name
-	 */
 	protected LocTracker(final String name) {
 		super(name);
 		
@@ -39,24 +27,14 @@ public class LocTracker extends Gauge<GeoPosition> {
 		this.setPnlMain();
 	}
 
-	/**
-	 * Metodo utilizzato da contact per ricevere una istanza dell'oggetto LocTracker
-	 * @param name
-	 * @return
-	 */
 	public static LocTracker istantiate(final String name) {
 		return new LocTracker(name);
 	}
 
-	/**
-	 * Metodo relativo all'inizializzazione del componente JXMapKit.
-	 * Viene impostato il provider di default da cui ricevere l'immagine e settata una
-	 * posizione iniziale di partenza del drone a partire dalle configurazioni presente nel file Data
-	 */
 	protected void setJxmMap() {
 	    this.jxmMap.setDefaultProvider(DefaultProviders.OpenStreetMaps);
 	    
-	    // Imposto la posizione di partenza e lo Zoom del componente grafico di visualizzazione della mappa
+	    // Setting the initial location and zoom of the map component
 	    this.jxmMap.setAddressLocation(new GeoPosition(Globals.INITIAL_LATITUDE, Globals.INITIAL_LONGITUDE));
 	    this.jxmMap.setZoom(locTrackerZoom);
 	    
@@ -66,10 +44,6 @@ public class LocTracker extends Gauge<GeoPosition> {
 	    this.jxmMap.setAddressLocationShown(true);
 	}
 
-
-	/**
-	 * Metodo utilizzato per organizzare il Layout dei componenti grafici
-	 */
 	protected void setPnlMain() {
 		javax.swing.GroupLayout pnlLocTracker = new javax.swing.GroupLayout(this.getPanel());
 		this.getPanel().setLayout(pnlLocTracker);
@@ -89,15 +63,9 @@ public class LocTracker extends Gauge<GeoPosition> {
         ));
 	}
 
-	/**
-	 * Metodo utilizzato per ricevere la posizione attuale del drone.
-	 */
 	@Override
 	public void setValue(final GeoPosition value) {
-		//double latitude = value.getLatitude();
-		//double longitude = value.getLongitude();
-		
-		// Aggiorno il cursore grafico all'ultima posizione rilevata
+		// Updating the map according to the last observed position
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -105,33 +73,4 @@ public class LocTracker extends Gauge<GeoPosition> {
 			}
 		});
 	}
-
-	
-	/**
-	 * Metodo utilizzato per l'inserimento all'interno della lista della posizione.
-	 * Richiama il painter per disegnare la nuova posizione sulla GUI
-	 * @param latitude
-	 * @param longitude
-	 */
-	/*
-	protected void addWaypoint(final double latitude, final double longitude) {
-
-		@SuppressWarnings("rawtypes")
-		WaypointPainter painter = new WaypointPainter();
-		extracted(painter);
-		
-		painter.setRenderer(new WaypointRenderer() {
-
-			@Override
-			public boolean paintWaypoint(final Graphics2D g, final JXMapViewer map,
-					final Waypoint waypoint) {
-				g.setColor(Color.BLUE);
-				g.drawLine(-5, -5, +5, +5);
-				g.drawLine(-5, +5, +5, -5);
-				return true;
-			}
-    	});
-
-		this.jxmMap.getMainMap().setOverlayPainter(painter);
-	}*/
 }

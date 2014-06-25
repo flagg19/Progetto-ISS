@@ -6,8 +6,7 @@ Context ctxSmartDevice;
 Subject smartGaugeDisplay context ctxSmartDevice;
 Subject drone external;
 
-
-Signal misurationS;	// Questa roba contiene un droneState	
+Signal misurationS;	
 
 //Interactions
 testSignal: smartGaugeDisplay emit misurationS;
@@ -16,31 +15,27 @@ smartGaugeDisplayReceiveMisuration: smartGaugeDisplay sense misurationS;
 
 //Behaviour
 BehaviorOf smartGaugeDisplay {
-	//var it.unibo.iss.group2.implementations.measures.Status statusDrone = new it.unibo.iss.group2.implementations.measures.Status()
 	
 	action String cleanString(String jsonString)
+	action void formatOutput(String jsonString)
 	
 	state gdInit initial
-		showMsg("----- SMART GAUGE DISPLAY START -----")
-		//doOut testSignal("caspiterella");
+		showMsg("---- SMART GAUGE DISPLAY START ----")
 		goToState gdIdle
 	endstate
 	
 	state gdIdle
-		showMsg("----- Waiting for drone state -----")
+		showMsg("---- Waiting for drone state ----")
 		onMessage misurationS transitTo gdUpdateView
 	endstate
 	
 	state gdUpdateView
-		showMsg(code.curInputMsgContent)
-
-		//showMsg(call cleanString(code.curInputMsgContent))
-		//set statusDrone = call statusDrone.dejsonify(call cleanString(code.curInputMsgContent)) 
+		call formatOutput(call cleanString(code.curInputMsgContent))
 		goToState gdIdle
 	endstate
 	
 	state gdEnd
-		showMsg("----- SMART GAUGE DISPLAY STOP -----")
+		showMsg("---- SMART GAUGE DISPLAY STOP ----")
 		transitToEnd
 	endstate	
 }

@@ -1,9 +1,7 @@
 package it.unibo.contact.SmartDeviceSystem;
 
-import android.widget.TextView;
 import it.unibo.android.SmartDeviceSystem.BaseActivity;
-import it.unibo.android.SmartDeviceSystem.OutView;
-import it.unibo.android.SmartDeviceSystem.R;
+import it.unibo.iss.group2.implementations.measures.Status;
 
 public class SmartGaugeDisplay extends SmartGaugeDisplaySupport {
 
@@ -16,16 +14,27 @@ public class SmartGaugeDisplay extends SmartGaugeDisplaySupport {
 	
 	public SmartGaugeDisplay(String name) throws Exception {
 		super(name);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	protected String cleanString(String jsonString) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	protected String cleanString(String s) throws Exception {
+		String tmp = s.replaceAll("_quote_token_", "\"");
+		return tmp.replace("'", "");
 	}
-
+	
 	public void showMsg( String msg){
  		ba.showMsg(msg);
+	}
+
+	@Override
+	protected void formatOutput(String jsonString) throws Exception {
+		Status status = new Status();
+		status = status.dejsonify(jsonString);
+		ba.showMsg("Distance: " + status.getDistance().getDistanceAsDouble() + "Km");
+		ba.showMsg("Fuel: " + status.getFuel().getFuelAsDouble() + "l");
+		ba.showMsg("Position (lat): " + ((org.jdesktop.swingx.mapviewer.GeoPosition)status.getPosition().getPositionAsGeoPosition()).getLatitude());
+		ba.showMsg("Position (lon): " + ((org.jdesktop.swingx.mapviewer.GeoPosition)status.getPosition().getPositionAsGeoPosition()).getLongitude());
+		ba.showMsg("Speed: " + status.getSpeed().getSpeedAsDouble() + "Km/h");
+		ba.showMsg("");
 	}
 }

@@ -21,6 +21,4 @@ public class Globals {
 	// DTF
 	public static final int DTF = 5;
 	public static final int DTFms = DTF * 1000;
-	
-	
 }

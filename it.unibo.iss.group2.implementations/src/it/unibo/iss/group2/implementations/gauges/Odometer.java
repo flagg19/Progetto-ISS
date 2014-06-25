@@ -11,11 +11,6 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.math.BigInteger;
 
-/**
- * Classe utilizzata per visualizzare sulla GUI il componente Odometer.
- * @author Alessandro
- *
- */
 public class Odometer extends Gauge<Double> {
 	
 	private final String     unitName;
@@ -26,13 +21,6 @@ public class Odometer extends Gauge<Double> {
 	public static int odometerWidth = 480;
 	public static int odometerHeight = 100;
 	
-	/**
-	 * Inizializza i componenti relativi all GUI
-	 * @param name
-	 * @param unitName
-	 * @param minValue
-	 * @param maxValue
-	 */
 	protected Odometer(final String name, final String unitName, final double minValue, final double maxValue) {
 		super(name);
 
@@ -45,21 +33,10 @@ public class Odometer extends Gauge<Double> {
 		this.init(minValue, maxValue);
 	}
 
-	/**
-	 * Metodo utilizzato da contact per ricevere una istanza dell'oggetto Odometer
-	 * @param name
-	 * @param unitName
-	 * @param minValue
-	 * @param maxValue
-	 * @return
-	 */
 	public static Odometer istantiate(final String name, final String unitName, final double minValue, final double maxValue) {
 		return new Odometer(name, unitName, minValue, maxValue);
 	}
 	
-	/**
-	 * Metodo utilizzato per ricevere la distanza attuale del drone.
-	 */
 	@Override
 	public void setValue(final Double value) {
 		EventQueue.invokeLater(new Runnable() {
@@ -71,11 +48,6 @@ public class Odometer extends Gauge<Double> {
 		});
 	}
 
-	/**
-	 * Metodo utilizzato per aggiornare i valori della componente grafica
-	 * @param minValue
-	 * @param maxValue
-	 */
 	protected void init(final double minValue, final double maxValue) {
 		this.linearValue.init(this.minWidth.intValue(), this.minHeight.intValue());
 
@@ -100,5 +72,4 @@ public class Odometer extends Gauge<Double> {
 		this.linearValue.setPreferredSize(new Dimension(this.minWidth
 				.intValue(), this.minHeight.intValue()));
 	}
-
 }

@@ -1,6 +1,6 @@
 package it.unibo.iss.group2.implementations.gauges;
 
-import eu.hansolo.steelseries.gauges.Radial; 		// Requires Trident at run time
+import eu.hansolo.steelseries.gauges.Radial;
 import eu.hansolo.steelseries.tools.BackgroundColor;
 import eu.hansolo.steelseries.tools.FrameDesign;
 import eu.hansolo.steelseries.tools.FrameEffect;
@@ -11,11 +11,6 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.math.BigInteger;
 
-/**
- * Classe utilizzata per visualizzare sulla GUI il componente Speedometer.
- * @author Alessandro
- *
- */
 public class Speedometer extends Gauge<Double> {
 
 	private final String     unitName;
@@ -28,13 +23,6 @@ public class Speedometer extends Gauge<Double> {
 	public static int speedometerWidth = 220;
 	public static int speedometerHeight = 220;
 
-	/**
-	 * Inizializza i componenti relativi all GUI
-	 * @param name
-	 * @param unitName
-	 * @param minValueShown
-	 * @param maxValueShown
-	 */
 	protected Speedometer(final String name, final String unitName,
 			final double minValueShown, final double maxValueShown) {
 		
@@ -51,23 +39,12 @@ public class Speedometer extends Gauge<Double> {
 		this.init();
 	}
 
-	/**
-	 * Metodo utilizzato da contact per ricevere una istanza dell'oggetto Speedometer
-	 * @param name
-	 * @param unitName
-	 * @param minValueShown
-	 * @param maxValueShown
-	 * @return
-	 */
 	public static Speedometer istantiate(final String name, final String unitName, 
 			final double minValueShown, final double maxValueShown) {
 
 		return new Speedometer(name, unitName, minValueShown, maxValueShown);
 	}
 	
-	/**
-	 * Metodo utilizzato per ricevere la velocita attuale del drone.
-	 */
 	@Override
 	public void setValue(final Double value) {
 		EventQueue.invokeLater(new Runnable() {
@@ -79,12 +56,8 @@ public class Speedometer extends Gauge<Double> {
 		});
 	}
 
-	/**
-	 * Metodo utilizzato per aggiornare i valori dei componenti grafici
-	 */
 	protected void init() {
-		this.radialValue.init(this.minWidth.intValue(),
-				this.minHeight.intValue());
+		this.radialValue.init(this.minWidth.intValue(), this.minHeight.intValue());
 
 		this.radialValue.setMinValue(this.minValue);
 		this.radialValue.setMaxValue(this.maxValue);
@@ -111,8 +84,7 @@ public class Speedometer extends Gauge<Double> {
 		this.getPanel().setLayout(mainPanelLayout);
 		this.getPanel().add(this.radialValue);
 
-		this.radialValue.setPreferredSize(new Dimension(this.minWidth
-				.intValue(), this.minHeight.intValue()));
+		this.radialValue.setPreferredSize(new Dimension(this.minWidth.intValue(), this.minHeight.intValue()));
 	}
   
 }

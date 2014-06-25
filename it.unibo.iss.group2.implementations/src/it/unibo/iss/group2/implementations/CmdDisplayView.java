@@ -12,20 +12,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/**
- * Classe utilizzata per gestire la componente SWING relativa al commandDisplay.
- * Il commandDisplay si compone principalmente di due parti:
- * 1) Un header contenente i bottoni necessari per l'interazione con l'utente. Questi comandi sono:
- * 		a) Incrementa velocita del drone
- * 		b) Decrementa velocita del drone
- * 		c) Avvia la missione del drone
- * 		d) Interrompi la missione del drone
- * 		e) Imposta una velocita di crociera al drone ( utilizzando una textArea per l'inserimento 
- * 			manuale della velocita all'utente)
- * 2) Una label contenente il log corrente del comando eseguito.
- * @author Alessandro
- *
- */
 public class CmdDisplayView extends JFrame {
 	
 	private ISyncMonitor syncMonitor;
@@ -44,11 +30,7 @@ public class CmdDisplayView extends JFrame {
 	private JButton     btnStartMission;
 	private JButton     btnStopMission;	
 	
-	/**
-	 * Carica sulla GUI i componenti e imposta la grafica di visualizzazione relativa 
-	 * ad ogni componente
-	 * @param name
-	 */
+	
 	public CmdDisplayView(final String name, ISyncMonitor syncMonitor) {
 		
 		this.syncMonitor = syncMonitor;
@@ -68,9 +50,6 @@ public class CmdDisplayView extends JFrame {
 	    this.btnSetSpeed = new JButton();
 	    this.btnStartMission = new JButton();
 	    this.btnStopMission = new JButton();
-	    
-	    // Imposto la velocita al valore di crociera fornito da specifiche
-	 	this.txtSpeed.setText("15");
 	 	
 	    this.lblTitle.setFont(new Font("Arial", Font.BOLD, 16));
 	    this.lblTitle.setText(this.name);
@@ -114,16 +93,10 @@ public class CmdDisplayView extends JFrame {
         pack();
 	}
 	
-	/**
-	 * Metodo utilizzato per impostare il contenitore ROOT
-	 */
 	public JPanel getPanelMain() {
 		return this.pnlMain;
 	}
 
-	/**
-	 * Metodo utilizzato per interrompere la GUI
-	 */
 	public void stopDisplay() {
 		this.btnSetSpeed.setEnabled(false);
 		this.btnStartMission.setEnabled(false);
@@ -133,18 +106,10 @@ public class CmdDisplayView extends JFrame {
 		this.lblStatus.setText(String.format("Automatic Stopped"));
 	}
 	
-	/**
-	 * Metodo utilizzato per generare una nuova istanza della classe
-	 * @param name
-	 * @return
-	 */
 	public static CmdDisplayView instantiate(final String name, ISyncMonitor syncMonitor) {
 		return new CmdDisplayView(name, syncMonitor);
 	}
     
-	/**
-	 * Metodo utilizzato per effettuare il set del layout del pannello dei comandi
-	 */
 	protected void setPnlCommand() {
 		javax.swing.GroupLayout pnlCommandLayout = new javax.swing.GroupLayout(pnlCommand);
 	    pnlCommand.setLayout(pnlCommandLayout);
@@ -189,9 +154,6 @@ public class CmdDisplayView extends JFrame {
 	    );
 	}
 	
-	/**
-	 * Metodo utilizzato per effettuare il set del layout del pannello ROOT
-	 */
 	protected void setPnlMain() {
 		this.getPanelMain().setLayout(new BorderLayout());
 	    this.getPanelMain().add(this.pnlCommand, BorderLayout.CENTER);

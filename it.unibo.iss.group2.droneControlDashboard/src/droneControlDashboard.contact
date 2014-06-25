@@ -8,11 +8,11 @@ Subject gaugeDisplay context ctxDroneControlDashboard -w;
 
 Subject drone external;
 
-Invitation command;		// Generico, il contenuto permette di discriminare tra i singoli comandi
+Invitation command;		// Generic command, the real command is it's content
 Request initialSpeed;
-Dispatch misuration;	// Questa roba contiene un droneState	
+Dispatch misuration;	// It's content will be a DroneState serialized
 Dispatch automaticStop;
-Request stream; 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
+Request stream; 		// Used by the drone to send all photos & sensors data to the Operaive Unit at the end of the mission
 
 //Interactions
 cmdDisplaySendInitialSpeed: cmdDisplay demand initialSpeed to drone;
@@ -52,7 +52,7 @@ BehaviorOf cmdDisplay {
  	
 	state cmdInit initial
 		showMsg("----- COMMAND DISPLAY INIT -----");
-		// Inizializzazione strutture dati ausiliarie 
+		// Initializing auxiliary data structures 
 		set labels = call initLabels()
 		set syncMonitor = call it.unibo.iss.group2.implementations.monitor.SyncMonitor.instantiate()
 		set guiCmd = call it.unibo.iss.group2.implementations.CmdDisplayView.instantiate("Cmd Display", syncMonitor)
@@ -73,7 +73,7 @@ BehaviorOf cmdDisplay {
 	state cmdSetInitialSpeed onException cmdError
 		set contentMessage = eval guiCmd.getSpeed().jsonify()
 		doOutIn cmdDisplaySendInitialSpeed(contentMessage)
-		// Attesa risposta (request/response) del drone
+		// Waiting for drone response (request/response)
 		acquireAnswerFor initialSpeed
 		showMsg(code.curReplyContent)
 		goToState cmdPreMission
@@ -133,7 +133,7 @@ BehaviorOf cmdDisplay {
 			showMsg("[ERROR] Unexpected command, doing nothing.");
 			goToState cmdIdle
 		}
-		doOutIn cmdDisplaySendCommand(call commandMsg.jsonify())	// invio messaggi di increaseSpeed, decreaseSpeed
+		doOutIn cmdDisplaySendCommand(call commandMsg.jsonify())	// Sending message (command)
 		acquireAckFor command
 		goToState cmdIdle
 	endstate
@@ -144,7 +144,6 @@ BehaviorOf cmdDisplay {
 	endstate
 	
   	state receiveFileContent onException cmdError
-  		showMsg("Si bloccherˆ?")
   		acquireAnswerFor stream
   		set contentMessage = code.curReplyContent
   		showMsg("Receive file content: " + contentMessage)
@@ -160,7 +159,7 @@ BehaviorOf cmdDisplay {
 		set rowContent = call curAcquireOneReply.acquireRawReply()  
 		set curDim = call rowContent.getDim()
   		if {  curDim == 0 }   {
-  			showMsg("3) Foto finita, in attesa di json");
+  			showMsg("3) Image received, waiting for json");
   			call fileToBuild.closeReceiving();
   			set fileRequestMsg = nIter + "_captured.status.json";
  			set fileDestPath = exec getDestFilePath(fileRequestMsg);
@@ -176,7 +175,7 @@ BehaviorOf cmdDisplay {
 		set rowContent = call curAcquireOneReply.acquireRawReply()  
 		set curDim = call rowContent.getDim()
   		if {  curDim == 0 }   {
-  			showMsg("3) Json finito");
+  			showMsg("3) Json received");
   			call fileToBuild.closeReceiving(); 
   			acquireAnswerFor stream;  
   			set nIter = nIter + const.1;
@@ -222,12 +221,7 @@ BehaviorOf gaugeDisplay {
 	endstate
 	
 	state gdNotifyAutomaticStop
-		showMsg("Automatic stop: premi stop")
+		showMsg("Automatic stop: press stop")
 		goToState gdIdle
-	endstate
-	
-	state gdEnd
-		showMsg("----- rimando indietro -----")
-		transitToEnd
 	endstate	
 }

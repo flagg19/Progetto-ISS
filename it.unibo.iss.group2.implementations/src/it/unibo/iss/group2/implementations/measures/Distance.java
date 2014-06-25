@@ -2,7 +2,6 @@ package it.unibo.iss.group2.implementations.measures;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import it.unibo.iss.group2.interfaces.globals.Globals;
 import it.unibo.iss.group2.interfaces.measures.IDistance;
 import it.unibo.iss.group2.interfaces.messages.IMessage;
 

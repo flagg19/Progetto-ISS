@@ -6,9 +6,6 @@ import java.util.List;
 import it.unibo.iss.group2.interfaces.messages.MessageLabels;
 import it.unibo.iss.group2.interfaces.monitor.ISyncMonitor;
 
-/**
- * @author FF
- */
 public class SyncMonitor implements ISyncMonitor {
 	
 	List<MessageLabels> pressedButtonQueue;

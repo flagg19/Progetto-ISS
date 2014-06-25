@@ -1,6 +1,6 @@
 package it.unibo.iss.group2.implementations.gauges;
 
-import eu.hansolo.steelseries.gauges.LinearBargraph;	// From  SteelSeries-3.9.30.jar
+import eu.hansolo.steelseries.gauges.LinearBargraph;
 import eu.hansolo.steelseries.tools.BackgroundColor;
 import eu.hansolo.steelseries.tools.FrameDesign;
 import eu.hansolo.steelseries.tools.FrameEffect;
@@ -11,11 +11,6 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.math.BigInteger;
 
-/**
- * Classe utilizzata per visualizzare sulla GUI il componente Fuelometer.
- * @author Alessandro
- *
- */
 public class Fuelometer extends Gauge<Double> {
 	public static int fuelometerWidth = 480;
 	public static int fuelometerHeight = 100;
@@ -27,13 +22,6 @@ public class Fuelometer extends Gauge<Double> {
 	private final double            minValue;
 	private final double            maxValue;
 
-	/**
-	 * Inizializza i componenti relativi all GUI
-	 * @param name
-	 * @param unitName
-	 * @param minValueShown
-	 * @param maxValueShown
-	 */
 	protected Fuelometer(final String name, final String unitName,
 			final double minValueShown, final double maxValueShown) {
 		super(name);
@@ -50,14 +38,6 @@ public class Fuelometer extends Gauge<Double> {
 		this.init();
 	}
 
-	/**
-	 * Metodo utilizzato da contact per ricevere una istanza dell'oggetto Fuelometer
-	 * @param name
-	 * @param unitName
-	 * @param minValueShown
-	 * @param maxValueShown
-	 * @return
-	 */
 	public static Fuelometer istantiate(final String name,
 			final String unitName, final double minValueShown,
 			final double maxValueShown) {
@@ -65,9 +45,6 @@ public class Fuelometer extends Gauge<Double> {
 		return new Fuelometer(name, unitName, minValueShown, maxValueShown);
 	}
 
-	/**
-	 * Metodo utilizzato per ricevere la quantita di carburante residua.
-	 */
 	@Override
 	public void setValue(final Double value) {
 		EventQueue.invokeLater(new Runnable() {
@@ -79,9 +56,6 @@ public class Fuelometer extends Gauge<Double> {
 		});
 	}
 	
-	/**
-	 * Metodo utilizzato per aggiornare i valori della componente grafica
-	 */
 	protected void init() {
 		this.linearBargraph.init(this.minWidth.intValue(),
 				this.minHeight.intValue());

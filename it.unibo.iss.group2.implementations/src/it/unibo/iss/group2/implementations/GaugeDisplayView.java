@@ -14,19 +14,7 @@ import it.unibo.iss.group2.interfaces.measures.IStatus;
 
 import java.awt.*;
 
-/**
- * Classe utilizzata per gestire la componente SWING relativa al gaugeDisplay.
- * Il gaugeDisplay si compone principalmente di tre parti:
- * 1) Una parte iniziale rappresentata dal LokTracker che permette la visualizzazione
- * su di una porzione di mappa estratta da GoogleMaps della posizione del drone
- * 2) Una parte centrale contenente le restanti informazioni sullo stato del drone quali:
- * 		a) Un Speedometer della velocita attuale del drone
- * 		b) Un Fuelometer del carburante residuo del drone
- * 		c) Un Odometer dei Km percorsi dal drone
- * 3) Un Label contenente il log corrente sullo stato di aggiornamento del gaugeDisplay
- * @author Alessandro
- *
- */
+
 public class GaugeDisplayView extends JFrame {
 
 	private final String		name;
@@ -36,25 +24,17 @@ public class GaugeDisplayView extends JFrame {
 	private final Odometer    	odometer;
 	private LocTracker  		locTracker;
 
-	// Rappresenta il contenitore ROOT della gerarchia
+	// Root container
 	private final JPanel		pnlMain;
-	// Contiene il componente LocTracker
+	// Panel containing LocTracker
 	private final JPanel		pnlGaugeOver;
-	// Contiene i componenti Odometer, Speedometer e Fuelometer
+	// Panel containing Odometer, Speedometer and Fuelometer
 	private final JPanel		pnlGaugeUnder;
 	
 	private final JLabel		lblTitle;
 	private final JLabel		lblStatus;  
 
-	/**
-	 * Carica sulla GUI i componenti e imposta la grafica di visualizzazione relativa 
-	 * ad ogni componente
-	 * @param name
-	 * @param fuelometer
-	 * @param speedometer
-	 * @param odometer
-	 * @param locTracker
-	 */
+	
 	protected GaugeDisplayView(final String name) {
 		this.name = name;
 		this.fuelometer = Fuelometer.istantiate("Fuelometer", "l", Globals.MIN_FUEL, Globals.MAX_FUEL);
@@ -99,30 +79,14 @@ public class GaugeDisplayView extends JFrame {
         pack();
 	}
 	
-	/**
-	 * Metodo utilizzato per generare una nuova istanza della classe
-	 * @param name
-	 * @param fuelometerView
-	 * @param speedometerView
-	 * @param odometerView
-	 * @param locTrackerView
-	 * @return
-	 */
 	public static GaugeDisplayView instantiate(final String name) {
 		return new GaugeDisplayView(name);
 	}
 	
-	
-	/**
-	 * Metodo utilizzato per impostare il contenitore ROOT
-	 */
 	public JPanel getPanelMain() {
 		return this.pnlMain;
 	}
 	
-	/**
-	 * Parte relativa al setting grafico del panel contenente il LokTracker
-	 */
 	protected void setPnlGaugeOver() {
 		javax.swing.GroupLayout pnlGaugeOverLayout = new javax.swing.GroupLayout(this.pnlGaugeOver);
 		this.pnlGaugeOver.setLayout(pnlGaugeOverLayout);
@@ -135,27 +99,7 @@ public class GaugeDisplayView extends JFrame {
 	            .addComponent(this.locTracker.getPanel(), javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE)
 	        );
 	}
-	/*
-	protected void setPnlGaugeOver() {
-		javax.swing.GroupLayout pnlGaugeOverLayout = new javax.swing.GroupLayout(this.pnlGaugeOver);
-		
-		this.pnlGaugeOver.setLayout(pnlGaugeOverLayout);
-        
-		pnlGaugeOverLayout.setHorizontalGroup(
-				pnlGaugeOverLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(this.locTracker.getPanel(), javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            );
-		pnlGaugeOverLayout.setVerticalGroup(
-				pnlGaugeOverLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(this.locTracker.getPanel(), javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE)
-            );
-	}
-	*/
-	
-	/**
-	 * Parte relativa al setting grafico del panel contenente i vari strumenti di visualizzazione
-	 * delle misure di stato del Drone quali Odometer, Fuelometer e Speedometer
-	 */
+
 	protected void setPnlGaugeUnder() {
 		javax.swing.GroupLayout pnlgaugeUnderLayout = new javax.swing.GroupLayout(this.pnlGaugeUnder);
 		this.pnlGaugeUnder.setLayout(pnlgaugeUnderLayout);
@@ -182,9 +126,6 @@ public class GaugeDisplayView extends JFrame {
         );
 	}
 	
-	/**
-	 * Panel globale contenente l'intera GUI di visualizzazione delle informazioni del Drone
-	 */
 	protected void setPnlMain() {
     javax.swing.GroupLayout pnlgaugeDisplayLayout = new javax.swing.GroupLayout(this.getPanelMain());
     this.getPanelMain().setLayout(pnlgaugeDisplayLayout);
@@ -207,10 +148,7 @@ public class GaugeDisplayView extends JFrame {
             .addComponent(this.lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
     );
 	}
-	
-	/**
-	 * Metodo utilizzato per aggiornare le informazioni relative ai componenti presenti sulla GUI
-	 */
+
 	public void updateDisplay(IStatus value) {
 		this.lblStatus.setText("Gauge Display updated. Position: (" 
 				+ value.getPosition().getPositionAsGeoPosition().getLatitude() + ", "

@@ -9,12 +9,12 @@ Subject cmdDisplay external;
 Subject gaugeDisplay external;
 Subject smartGaugeDisplay external;
 
-Invitation command;		// Generico, il contenuto permette di discriminare tra i singoli comandi
+Invitation command;		// Generic command, the real command is it's content
 Request initialSpeed;	
-Dispatch misuration;
-Signal misurationS;
+Dispatch misuration;	// It's content will be a DroneState serialized
+Signal misurationS;		// It's content will be a DroneState serialized
 Dispatch automaticStop;
-Request stream; 	// Usato per mandare alla centrale (dal drone) tutte le foto della missione
+Request stream;			// Used by the drone to send all photos & sensors data to the Operaive Unit at the end of the mission
 
 //Interactions
 droneReceiveInitialSpeed: drone grant initialSpeed support=TCP [host="localhost" port=8060];
@@ -41,7 +41,7 @@ BehaviorOf drone {
 	val it.unibo.iss.group2.sensors.ISensor positionSensor = new it.unibo.iss.group2.sensors.PositionSensor()
 	val it.unibo.iss.group2.sensors.ISensor speedSensor = new it.unibo.iss.group2.sensors.SpeedSensor() 
 	
-	// Nota: la speed in questo contesto non è un valore rilevato istantaneamente da un sensore ma è il valore alla quale il drone è obbligato ad andare
+	// Note: this is not the drone speed observed by the speed sensor at any time but the speed that the drone should tend to
 	var it.unibo.iss.group2.implementations.measures.Speed speedDrone = new it.unibo.iss.group2.implementations.measures.Speed(0)
 	var it.unibo.iss.group2.implementations.measures.Status statusDrone = null
 	
@@ -62,11 +62,6 @@ BehaviorOf drone {
 	
 	state droneInit initial
 		showMsg("----- DRONE START -----")
-		/*
-		// For signal/smart device test only
-		doOut droneSendMisurationS("X")
-		doOut droneSendMisurationS("Y")
-		*/
 		set messageLabels = call initLabels()
 		onMessage initialSpeed transitTo droneSetInitialSpeed
 	endstate
@@ -102,12 +97,13 @@ BehaviorOf drone {
 		// Send status to Smart Devices
 		doOut droneSendMisurationS(call hl_replaceQuotes(call statusDrone.jsonify()))
 		
-		showMsg("Inviato: "+call statusDrone.jsonify())
+		showMsg("Sent: " + call statusDrone.jsonify())
 		
 		if {statusDrone.stopCondition()}
 		{
 			goToState droneAutomaticStop
 		}
+		
 		// Are there any messages?
 		onMessage? command goToState droneProcessCommand
 		goToState droneFly
@@ -170,29 +166,29 @@ BehaviorOf drone {
 	state sourceCheckForRemainingFiles onException droneError
 		if{ nIter < nFiles }
 		{ 
-			showMsg("Altri file: " + nIter);
+			showMsg("Other files: " + nIter);
 			replyStepToRequest stream("MORE FILES");
 			goToState sourceSendFileContent
 		}
-		showMsg("Finiti files")
+		showMsg("No more files")
 		goToState sourceSendEndStream
 	endstate
 			
 	state sourceSendFileContent onException droneError
  		showMsg("2) send file content (FOR TCP ONLY)")
  		set sourceFilePath = "files/captured.jpg"
- 		call curRequest.replyStepContentToCaller( sourceFilePath  )
- 		showMsg("3) send endOfAnswerSysMsg "   )  
+ 		call curRequest.replyStepContentToCaller(sourceFilePath)
+ 		showMsg("3) send endOfAnswerSysMsg ")  
    		replyStepToRequest stream("END OF PHOTO")
    		set sourceFilePath = "files/" + nIter + "_captured.status.json" 
-   		call curRequest.replyStepContentToCaller( sourceFilePath  )
+   		call curRequest.replyStepContentToCaller(sourceFilePath)
    		replyStepToRequest stream("END OF JSON") 
  		set nIter = nIter + const.1
  	 	goToState sourceCheckForRemainingFiles
 	endstate
 	
 	state sourceSendEndStream onException droneError
-		showMsg("4) send END MSG "   )
+		showMsg("4) send END MSG ")
 		replyStepToRequest stream("END STREAM")		
 		goToState droneStop  
 	endstate	
