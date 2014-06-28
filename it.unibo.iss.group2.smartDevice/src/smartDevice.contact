@@ -1,4 +1,4 @@
-ContactSystem SmartDeviceSystem spaceUpdater [host="192.168.1.102" port=8070];
+ContactSystem SmartDeviceSystem spaceUpdater [host="updaterserver.local" port=8070];
 
 // Structure
 Context ctxSmartDevice;
@@ -9,7 +9,6 @@ Subject drone external;
 Signal misurationS;	
 
 //Interactions
-testSignal: smartGaugeDisplay emit misurationS;
 smartGaugeDisplayReceiveMisuration: smartGaugeDisplay sense misurationS;
 
 
