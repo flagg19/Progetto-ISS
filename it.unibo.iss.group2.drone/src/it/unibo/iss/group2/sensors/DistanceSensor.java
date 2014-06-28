@@ -14,7 +14,7 @@ public class DistanceSensor implements ISensor<IDistance> {
 	
 	@Override
 	public IDistance getValue(ISpeed speed) {
-		Double shift = speed.getSpeedAsDouble() * Globals.DTF;
+		Double shift = speed.getSpeedAsDouble() * Globals.DTF / 3600;
 		curDistance = new Distance(curDistance.getDistanceAsDouble() + shift);
 		return curDistance;
 	}

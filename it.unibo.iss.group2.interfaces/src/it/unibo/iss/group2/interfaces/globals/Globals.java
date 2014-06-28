@@ -7,7 +7,7 @@ public class Globals {
 	public final static double DS = 10;
 	
 	// ODOMETER
-	public final static double MAX_DISTANCE = 2000;
+	public final static double MAX_DISTANCE = 10;
 	
 	// FUEL
 	public final static double MIN_FUEL = 0.5;

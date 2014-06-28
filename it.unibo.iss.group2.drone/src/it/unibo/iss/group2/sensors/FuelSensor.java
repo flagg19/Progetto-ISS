@@ -14,7 +14,7 @@ public class FuelSensor implements ISensor<IFuel> {
 	
 	@Override
 	public IFuel getValue(ISpeed speed) {
-		Double consumption = speed.getSpeedAsDouble() * Globals.CONSUMPTION_PARAM / 3600 * Globals.DTF;
+		Double consumption = speed.getSpeedAsDouble() * Globals.CONSUMPTION_PARAM / 3600;
 		curFuel = new Fuel(curFuel.getFuelAsDouble() - consumption);
 		return curFuel;
 	}
